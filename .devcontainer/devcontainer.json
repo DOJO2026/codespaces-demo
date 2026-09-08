@@ -1,4 +1,27 @@
 {
-  "name": "Demo Codespace",
-  "image": "mcr.microsoft.com/devcontainers/universal:2"
+  "name": "Codespaces DevOps Demo",
+
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+
+    "ghcr.io/devcontainers/features/git:1": {},
+
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+
+    "ghcr.io/devcontainers/features/maven:1": {},
+
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+
+    "ghcr.io/devcontainers/features/terraform:1": {}
+
+  }
 }
