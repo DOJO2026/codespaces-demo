@@ -4,24 +4,26 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
   "features": {
-
     "ghcr.io/devcontainers/features/git:1": {},
-
     "ghcr.io/devcontainers/features/github-cli:1": {},
-
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    },
 
     "ghcr.io/devcontainers/features/java:1": {
       "version": "17"
     },
 
-    "ghcr.io/devcontainers/features/maven:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
 
     "ghcr.io/devcontainers/features/azure-cli:1": {},
 
     "ghcr.io/devcontainers/features/terraform:1": {}
+  },
 
-  }
+  "forwardPorts": [
+    8080,
+    5173
+  ],
+
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y maven && cd backend && ./mvnw dependency:go-offline && cd ../frontend && npm install"
 }
