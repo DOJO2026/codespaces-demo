@@ -1,0 +1,93 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  terraform:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra
+
+    env:
+
+      TF_VAR_LOCATION: ${{ secrets.TF_VAR_LOCATION }}
+      TF_VAR_RESOURCE_GROUP_NAME: ${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}
+
+      TF_VAR_APP_SERVICE_PLAN_NAME: ${{ secrets.TF_VAR_APP_SERVICE_PLAN_NAME }}
+
+      TF_VAR_BACKEND_APP_NAME: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
+      TF_VAR_FRONTEND_APP_NAME: ${{ secrets.TF_VAR_FRONTEND_APP_NAME }}
+
+      TF_VAR_SQL_SERVER_NAME: ${{ secrets.TF_VAR_SQL_SERVER_NAME }}
+      TF_VAR_DATABASE_NAME: ${{ secrets.TF_VAR_DATABASE_NAME }}
+
+      TF_VAR_SQL_ADMIN_LOGIN: ${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}
+      TF_VAR_SQL_ADMIN_PASSWORD: ${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.13.2
+
+    - name: Install Terragrunt
+
+      run: |
+
+        TG_VERSION=0.92.4
+
+        wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64
+
+        chmod +x terragrunt_linux_amd64
+
+        sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+
+        terragrunt --version
+
+    - name: Terraform Format
+
+      run: terraform fmt -recursive
+
+    - name: Terragrunt Format
+
+      run: terragrunt hclfmt
+
+    - name: Terragrunt Init
+
+      run: terragrunt run --all init
+
+    - name: Terragrunt Validate
+
+      run: terragrunt run --all validate
+
+    - name: Terragrunt Plan
+
+      run: terragrunt run --all plan
+
+    - name: Terragrunt Apply
+
+      run: terragrunt run --all apply --auto-approve
