@@ -4,10 +4,22 @@ include "root" {
 
 dependency "resource_group" {
   config_path = "../resource_group"
+
+  mock_outputs = {
+    RESOURCE_GROUP_NAME = "mock-resource-group"
+    LOCATION             = "eastus2"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 }
 
 dependency "app_service_plan" {
   config_path = "../app_service_plan"
+
+  mock_outputs = {
+    ID   = "mock-app-service-plan-id"
+    NAME = "mock-app-service-plan"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 }
 
 terraform {

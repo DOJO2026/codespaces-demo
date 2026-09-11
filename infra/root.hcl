@@ -34,16 +34,22 @@ provider "azurerm" {
 EOF
 }
 
-# Estado remoto para que las ejecuciones de CI 
-#compartan el historial en lugar de comenzar desde un archivo 
-#de estado local vacío cada vez (lo que haría que Terragrunt 
-#intentara recrear recursos que ya existen a partir de la segunda ejecución).
-
-# El grupo de recursos y la cuenta de almacenamiento
-#que se indican a continuación deben existir ANTES de la primera ejecución.
-# Créelos manualmente una sola vez (consulte el archivo 
-#README/notas de configuración de la infraestructura); no se crean mediante esta canalización.
-
+# Remote state so CI runs share history instead of starting from an empty local
+# state file every time (which would make terragrunt try to re-create resources
+# that already exist on the 2nd run and onward).
+#
+# The resource group + storage account + container get created automatically
+# by the workflow's "Terragrunt Backend Bootstrap" step - but that step runs
+# `terragrunt backend bootstrap` (no --all) from inside the resource_group
+# unit specifically, not across every unit. Two reasons:
+#   1. All 5 units share this exact same backend (same storage account/
+#      container, only `key` differs per unit) - bootstrapping once is enough.
+#   2. `backend bootstrap --all` tries to fully evaluate every unit, including
+#      their `dependency` blocks - which fails before resource_group's own
+#      state (and therefore backend) exists yet. resource_group has no
+#      `dependency` block, so bootstrapping through it avoids that entirely.
+# `location` is a literal here (not `local.location`) because this bootstrap
+# phase does not reliably resolve `locals` references.
 remote_state {
 
   backend = "azurerm"
@@ -55,6 +61,7 @@ remote_state {
     storage_account_name = get_env("TF_STATE_STORAGE_ACCOUNT_NAME")
     container_name       = "tfstate"
     key                  = "${path_relative_to_include()}/terraform.tfstate"
+    location              = "eastus2"
 
     # Authenticate to the state storage account with the same OIDC identity
     # used for everything else instead of a separate storage account key.

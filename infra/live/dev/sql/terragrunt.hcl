@@ -6,6 +6,12 @@ dependency "resource_group" {
 
   config_path = "../resource_group"
 
+  mock_outputs = {
+    RESOURCE_GROUP_NAME = "mock-resource-group"
+    LOCATION             = "eastus2"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+
 }
 
 terraform {
