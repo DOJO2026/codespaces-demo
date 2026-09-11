@@ -10,7 +10,7 @@ on:
 permissions:
   id-token: write
   contents: read
-
+s
 jobs:
 
   terraform:
@@ -22,6 +22,19 @@ jobs:
         working-directory: infra
 
     env:
+
+      # Lets the azurerm provider (generated into every unit by infra/root.hcl)
+      # authenticate with the same federated GitHub OIDC identity as the
+      # "Azure Login" step below, without a client secret.
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_USE_OIDC: "true"
+
+      # Pre-existing storage account that holds the Terraform state (create it
+      # once by hand before the first run - see infra/README.md).
+      TF_STATE_RESOURCE_GROUP_NAME: ${{ secrets.TF_STATE_RESOURCE_GROUP_NAME }}
+      TF_STATE_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STATE_STORAGE_ACCOUNT_NAME }}
 
       TF_VAR_LOCATION: ${{ secrets.TF_VAR_LOCATION }}
       TF_VAR_RESOURCE_GROUP_NAME: ${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}
