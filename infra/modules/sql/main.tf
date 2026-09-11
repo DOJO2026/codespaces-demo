@@ -4,7 +4,7 @@ resource "azurerm_mssql_server" "this" {
 
   resource_group_name = var.RESOURCE_GROUP_NAME
 
-  location = var.LOCATION
+  location = var.SQL_LOCATION
 
   version = "12.0"
 

@@ -35,9 +35,12 @@ inputs = {
   # subscription currently allows SQL provisioning in "centralus" but not
   # in "East US 2" (where everything else lives). Change this literal
   # value directly if you need a different region later - no GitHub secret
-  # required. TF_VAR_SQL_LOCATION still works as an override if set, purely
-  # as an escape hatch.
-  LOCATION = get_env("TF_VAR_SQL_LOCATION", "centralus")
+  # required.
+  #
+  # Named SQL_LOCATION (not LOCATION) on purpose - see the comment on the
+  # module's SQL_LOCATION variable for why reusing "LOCATION" here silently
+  # broke this exact override (the job-level TF_VAR_LOCATION env var won).
+  SQL_LOCATION = get_env("TF_VAR_SQL_LOCATION", "centralus")
 
   ADMINISTRATOR_LOGIN = get_env("TF_VAR_SQL_ADMIN_LOGIN")
 
