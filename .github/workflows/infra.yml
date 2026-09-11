@@ -163,6 +163,34 @@ jobs:
 
       run: terragrunt run --all plan
 
+    - name: Clean Up Orphaned SQL Server (wrong region)
+
+      # Azure SQL Server names are globally unique. If an earlier apply
+      # attempted to create this server in a region that turned out to be
+      # blocked (see the SQL_LOCATION comment in
+      # infra/live/dev/sql/terragrunt.hcl), Azure can leave behind an
+      # orphaned server object registered in that old region - which then
+      # blocks creating the real one in the correct region with an
+      # "InvalidResourceLocation" 409 Conflict. This step detects exactly
+      # that situation and removes the leftover automatically, so it never
+      # needs to be cleaned up by hand. It only deletes when the existing
+      # server's region does NOT match the region this project actually
+      # wants - a real, already-correct server is never touched. Keep
+      # "centralus" here in sync with the SQL_LOCATION default in
+      # infra/live/dev/sql/terragrunt.hcl if that's ever changed.
+      run: |
+        TARGET_SQL_LOCATION="centralus"
+        EXISTING_LOCATION=$(az sql server show \
+          --name "$TF_VAR_SQL_SERVER_NAME" \
+          --resource-group "$TF_VAR_RESOURCE_GROUP_NAME" \
+          --query location -o tsv 2>/dev/null || echo "")
+        if [ -n "$EXISTING_LOCATION" ] && [ "$EXISTING_LOCATION" != "$TARGET_SQL_LOCATION" ]; then
+          echo "Found a leftover SQL Server '$TF_VAR_SQL_SERVER_NAME' in '$EXISTING_LOCATION' (from an earlier failed attempt) - it's blocking creation in '$TARGET_SQL_LOCATION'. Deleting it."
+          az sql server delete --name "$TF_VAR_SQL_SERVER_NAME" --resource-group "$TF_VAR_RESOURCE_GROUP_NAME" --yes
+        else
+          echo "No orphaned SQL Server found in the wrong region - nothing to clean up."
+        fi
+
     - name: Terragrunt Apply
 
       # `--auto-approve` isn't a Terragrunt flag - it must be forwarded to
