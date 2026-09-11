@@ -31,14 +31,12 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       ARM_USE_OIDC: "true"
 
-      # Turns on terragrunt's azurerm backend auto-provisioning, so the
-      # "Terragrunt Backend Bootstrap" step below can create the state
-      # resource group/storage account/container itself instead of requiring
-      # them to be created by hand first.
+      # Turns on terragrunt's azurerm backend auto-provisioning, used by the
+      # "Terragrunt Backend Bootstrap" step below.
       TG_EXPERIMENT: azure-backend
 
-      # Names for the state storage account - the resources themselves get
-      # created automatically by this workflow, you only pick the names.
+      # Names for the state storage account - created automatically by the
+      # bootstrap step, you only pick the names.
       TF_STATE_RESOURCE_GROUP_NAME: ${{ secrets.TF_STATE_RESOURCE_GROUP_NAME }}
       TF_STATE_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STATE_STORAGE_ACCOUNT_NAME }}
 
@@ -93,18 +91,69 @@ jobs:
 
     - name: Terragrunt Format
 
-      run: terragrunt hclfmt
+      run: terragrunt hcl fmt
 
     - name: Terragrunt Backend Bootstrap
 
-      # Creates the state resource group / storage account / blob container
-      # from infra/root.hcl's remote_state block if they don't exist yet.
-      # Idempotent - a no-op once they're there.
-      run: terragrunt backend bootstrap --all
+      # Creates the shared state resource group / storage account / blob
+      # container (from infra/root.hcl's remote_state block) if missing.
+      # Runs from inside the resource_group unit specifically (not --all):
+      # that unit has no `dependency` block, so bootstrapping through it
+      # avoids the "no variable named dependency" failure that `--all` hits
+      # on every other unit (whose dependencies aren't applied yet on a
+      # first-ever run). All 5 units point at the same backend storage
+      # account/container, so bootstrapping once here is enough for all of
+      # them. Idempotent - a no-op on later runs.
+      working-directory: infra/live/dev/resource_group
+      run: terragrunt backend bootstrap
+
+    - name: Grant Storage Blob Data Role
+
+      # Bootstrap creates the state storage account, but "Contributor" alone
+      # doesn't grant blob DATA access under use_azuread_auth - that needs a
+      # separate data-plane role. Requires the App Registration to have
+      # "User Access Administrator" on the subscription (granted once by
+      # hand, see infra/README.md) so it can assign this to itself.
+      # A failure here is NOT swallowed silently: it's only tolerated when
+      # Azure's own message says the assignment already exists. Any other
+      # failure (e.g. missing "User Access Administrator") fails the job
+      # loudly, right here, instead of resurfacing as a confusing 403 two
+      # steps later on Terragrunt Init.
+      run: |
+        set +e
+        OUTPUT=$(az role assignment create --assignee "$ARM_CLIENT_ID" \
+          --role "Storage Blob Data Contributor" \
+          --scope "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$TF_STATE_RESOURCE_GROUP_NAME/providers/Microsoft.Storage/storageAccounts/$TF_STATE_STORAGE_ACCOUNT_NAME" 2>&1)
+        STATUS=$?
+        echo "$OUTPUT"
+        if [ $STATUS -ne 0 ] && ! echo "$OUTPUT" | grep -qi "already exists"; then
+          echo "::error::Role assignment failed for a reason other than 'already exists'. Most likely cause: the App Registration ($ARM_CLIENT_ID) does not have 'User Access Administrator' on the subscription yet - see infra/README.md for the one-time command to grant it."
+          exit 1
+        fi
+        set -e
+
+    - name: Wait for RBAC propagation
+
+      # Azure role assignments are eventually consistent - even a successful
+      # assignment above can take a few minutes to actually take effect.
+      # Without this pause, Terragrunt Init below can still hit the same
+      # AuthorizationPermissionMismatch 403 immediately after a *successful*
+      # role grant, purely due to propagation lag.
+      run: sleep 60
 
     - name: Terragrunt Init
 
-      run: terragrunt run --all init
+      # Retries to absorb any remaining RBAC propagation delay: each failed
+      # attempt waits longer before trying again instead of failing the
+      # whole job outright.
+      run: |
+        for i in 1 2 3 4 5; do
+          terragrunt run --all init && exit 0
+          echo "Init failed (attempt $i/5) - likely still propagating RBAC permissions, retrying in 30s..."
+          sleep 30
+        done
+        echo "::error::Terragrunt Init still failing after 5 attempts - this is no longer a propagation delay, check the role assignment itself."
+        exit 1
 
     - name: Terragrunt Validate
 
