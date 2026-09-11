@@ -103,6 +103,20 @@ jobs:
       working-directory: infra/live/dev/resource_group
       run: terragrunt backend bootstrap
 
+    - name: Grant Storage Blob Data Role
+
+      # Bootstrap creates the state storage account, pero "Contributor" solo
+      # no da acceso de DATOS al blob bajo use_azuread_auth - hace falta este
+      # rol aparte. Requiere que la App tenga "User Access Administrator"
+      # en la suscripcion (se otorga una sola vez a mano) para poder
+      # asignarse este rol a si misma. El "|| echo" hace que sea inofensivo
+      # en cada corrida despues de la primera, donde ya existe.
+      run: |
+        az role assignment create --assignee "$ARM_CLIENT_ID" \
+          --role "Storage Blob Data Contributor" \
+          --scope "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$TF_STATE_RESOURCE_GROUP_NAME/providers/Microsoft.Storage/storageAccounts/$TF_STATE_STORAGE_ACCOUNT_NAME" \
+          || echo "Role assignment already exists (or not yet propagated) - continuing"
+
     - name: Terragrunt Init
 
       run: terragrunt run --all init
