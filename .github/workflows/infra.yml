@@ -93,7 +93,7 @@ jobs:
 
     - name: Terragrunt Format
 
-      run: terragrunt hclfmt
+      run: terragrunt hcl fmt
 
     - name: Terragrunt Backend Bootstrap
 
