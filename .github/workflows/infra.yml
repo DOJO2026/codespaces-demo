@@ -31,8 +31,14 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       ARM_USE_OIDC: "true"
 
-      # Pre-existing storage account that holds the Terraform state (create it
-      # once by hand before the first run - see infra/README.md).
+      # Turns on terragrunt's azurerm backend auto-provisioning, so the
+      # "Terragrunt Backend Bootstrap" step below can create the state
+      # resource group/storage account/container itself instead of requiring
+      # them to be created by hand first.
+      TG_EXPERIMENT: azure-backend
+
+      # Names for the state storage account - the resources themselves get
+      # created automatically by this workflow, you only pick the names.
       TF_STATE_RESOURCE_GROUP_NAME: ${{ secrets.TF_STATE_RESOURCE_GROUP_NAME }}
       TF_STATE_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STATE_STORAGE_ACCOUNT_NAME }}
 
@@ -71,7 +77,7 @@ jobs:
 
       run: |
 
-        TG_VERSION=0.92.4
+        TG_VERSION=1.1.4
 
         wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64
 
@@ -88,6 +94,13 @@ jobs:
     - name: Terragrunt Format
 
       run: terragrunt hclfmt
+
+    - name: Terragrunt Backend Bootstrap
+
+      # Creates the state resource group / storage account / blob container
+      # from infra/root.hcl's remote_state block if they don't exist yet.
+      # Idempotent - a no-op once they're there.
+      run: terragrunt backend bootstrap --all
 
     - name: Terragrunt Init
 

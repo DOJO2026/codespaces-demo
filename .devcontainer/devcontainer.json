@@ -25,5 +25,5 @@
     5173
   ],
 
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y maven && TG_VERSION=0.92.4 && curl -sSL -o /tmp/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64 && chmod +x /tmp/terragrunt && sudo mv /tmp/terragrunt /usr/local/bin/terragrunt && cd backend && ./mvnw dependency:go-offline && cd ../frontend && npm install"
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y maven && TG_VERSION=1.1.4 && curl -sSL -o /tmp/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64 && chmod +x /tmp/terragrunt && sudo mv /tmp/terragrunt /usr/local/bin/terragrunt && cd backend && ./mvnw dependency:go-offline && cd ../frontend && npm install"
 }
