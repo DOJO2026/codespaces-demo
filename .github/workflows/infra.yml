@@ -114,11 +114,11 @@ jobs:
       # separate data-plane role. Requires the App Registration to have
       # "User Access Administrator" on the subscription (granted once by
       # hand, see infra/README.md) so it can assign this to itself.
-      # A failure here is NOT swallowed silently: it's only tolerated when
-      # Azure's own message says the assignment already exists. Any other
-      # failure (e.g. missing "User Access Administrator") fails the job
-      # loudly, right here, instead of resurfacing as a confusing 403 two
-      # steps later on Terragrunt Init.
+      # Unlike before, a failure here is no longer swallowed silently: it's
+      # only tolerated when Azure's own message says the assignment already
+      # exists. Any other failure (e.g. missing "User Access Administrator")
+      # now fails the job loudly, right here, instead of resurfacing as a
+      # confusing 403 two steps later on Terragrunt Init.
       run: |
         set +e
         OUTPUT=$(az role assignment create --assignee "$ARM_CLIENT_ID" \
@@ -165,4 +165,7 @@ jobs:
 
     - name: Terragrunt Apply
 
-      run: terragrunt run --all apply --auto-approve
+      # `--auto-approve` isn't a Terragrunt flag - it must be forwarded to
+      # Terraform after `--`, and Terraform itself expects a single dash
+      # (`-auto-approve`), not the double-dash form.
+      run: terragrunt run --all apply -- -auto-approve
