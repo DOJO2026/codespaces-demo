@@ -28,7 +28,13 @@ inputs = {
 
   RESOURCE_GROUP_NAME = dependency.resource_group.outputs.RESOURCE_GROUP_NAME
 
-  LOCATION = dependency.resource_group.outputs.LOCATION
+  # Azure SQL logical servers can be blocked ("ProvisioningDisabled") in a
+  # region that otherwise works fine for App Service / generic resources -
+  # this is a per-subscription restriction, not a code issue. Set the
+  # TF_VAR_SQL_LOCATION secret to a region your subscription allows for SQL
+  # (e.g. "eastus") to override just this unit's region; if that secret
+  # isn't set, it falls back to the same region as everything else.
+  LOCATION = get_env("TF_VAR_SQL_LOCATION", dependency.resource_group.outputs.LOCATION)
 
   ADMINISTRATOR_LOGIN = get_env("TF_VAR_SQL_ADMIN_LOGIN")
 
