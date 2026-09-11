@@ -18,7 +18,14 @@ resource "azurerm_linux_web_app" "this" {
 
     application_stack {
 
-      java_version = var.RUNTIME == "JAVA" ? "17" : null
+      # The azurerm provider requires java_server, java_server_version AND
+      # java_version to all be set together (or all left null) - setting
+      # java_version alone fails validation. "JAVA" as the server means
+      # Java SE (no Tomcat/JBoss), which is what a Spring Boot fat jar
+      # (run via `java -jar`) needs.
+      java_server         = var.RUNTIME == "JAVA" ? "JAVA" : null
+      java_server_version = var.RUNTIME == "JAVA" ? "17" : null
+      java_version         = var.RUNTIME == "JAVA" ? "17" : null
 
       node_version = var.RUNTIME == "NODE" ? "20-lts" : null
 

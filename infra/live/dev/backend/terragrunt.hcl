@@ -15,8 +15,12 @@ dependency "resource_group" {
 dependency "app_service_plan" {
   config_path = "../app_service_plan"
 
+  # Must look like a real Azure App Service Plan resource ID: the azurerm
+  # provider parses/validates this ID's shape even during `plan` (it's a
+  # known value, not "known after apply"), so a plain placeholder string
+  # like "mock-app-service-plan-id" fails with a segment-count error.
   mock_outputs = {
-    ID   = "mock-app-service-plan-id"
+    ID   = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mock-resource-group/providers/Microsoft.Web/serverFarms/mock-app-service-plan"
     NAME = "mock-app-service-plan"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
