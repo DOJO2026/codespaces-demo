@@ -1,6 +1,10 @@
+com/codespacesdemo/service/ClienteService.class
 com/codespacesdemo/config/CorsConfig$1.class
 com/codespacesdemo/controller/DemoController.class
 com/codespacesdemo/service/DemoService.class
+com/codespacesdemo/controller/ClienteController.class
 com/codespacesdemo/dto/DemoResponse.class
+com/codespacesdemo/entity/Cliente.class
 com/codespacesdemo/CodespacesDemoApplication.class
+com/codespacesdemo/repository/ClienteRepository.class
 com/codespacesdemo/config/CorsConfig.class
