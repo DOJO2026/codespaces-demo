@@ -30,11 +30,14 @@ inputs = {
 
   # Azure SQL logical servers can be blocked ("ProvisioningDisabled") in a
   # region that otherwise works fine for App Service / generic resources -
-  # this is a per-subscription restriction, not a code issue. Set the
-  # TF_VAR_SQL_LOCATION secret to a region your subscription allows for SQL
-  # (e.g. "eastus") to override just this unit's region; if that secret
-  # isn't set, it falls back to the same region as everything else.
-  LOCATION = get_env("TF_VAR_SQL_LOCATION", dependency.resource_group.outputs.LOCATION)
+  # this is a per-subscription/region restriction from Azure, not a code
+  # issue. Hardcoded here (not a secret - it's not sensitive) since your
+  # subscription currently allows SQL provisioning in "centralus" but not
+  # in "East US 2" (where everything else lives). Change this literal
+  # value directly if you need a different region later - no GitHub secret
+  # required. TF_VAR_SQL_LOCATION still works as an override if set, purely
+  # as an escape hatch.
+  LOCATION = get_env("TF_VAR_SQL_LOCATION", "centralus")
 
   ADMINISTRATOR_LOGIN = get_env("TF_VAR_SQL_ADMIN_LOGIN")
 
