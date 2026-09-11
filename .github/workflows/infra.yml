@@ -100,7 +100,8 @@ jobs:
       # Creates the state resource group / storage account / blob container
       # from infra/root.hcl's remote_state block if they don't exist yet.
       # Idempotent - a no-op once they're there.
-      run: terragrunt backend bootstrap --all
+      working-directory: infra/live/dev/resource_group
+      run: terragrunt backend bootstrap
 
     - name: Terragrunt Init
 
