@@ -167,5 +167,8 @@ jobs:
 
       # `--auto-approve` isn't a Terragrunt flag - it must be forwarded to
       # Terraform after `--`, and Terraform itself expects a single dash
-      # (`-auto-approve`), not the double-dash form.
-      run: terragrunt run --all apply -- -auto-approve
+      # (`-auto-approve`), not the double-dash form. Separately, `run --all
+      # apply` also has its OWN confirmation prompt ("Are you sure...")
+      # before it even gets to Terraform - `--non-interactive` skips that,
+      # which is required in CI since there's no TTY to answer it.
+      run: terragrunt run --all apply --non-interactive -- -auto-approve
