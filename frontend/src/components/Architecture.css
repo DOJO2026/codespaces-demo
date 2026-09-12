@@ -1,0 +1,85 @@
+.architecture{
+
+    margin-top:35px;
+
+    background:#101826;
+
+    border:1px solid #00cfff;
+
+    border-radius:15px;
+
+    padding:35px;
+
+}
+
+.architecture h2{
+
+    text-align:center;
+
+    color:#00d4ff;
+
+    margin-bottom:35px;
+
+    font-size:32px;
+
+}
+
+.flow{
+
+    display:flex;
+
+    justify-content:space-around;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+
+}
+
+.node{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    color:white;
+
+    width:120px;
+
+}
+
+.node span{
+
+    margin-top:12px;
+
+    font-size:16px;
+
+}
+
+.node svg{
+
+    color:#00cfff;
+
+    transition:.35s;
+
+}
+
+.node:hover svg{
+
+    transform:scale(1.18);
+
+    color:white;
+
+}
+
+.arrow{
+
+    color:#00d4ff;
+
+    font-size:30px;
+
+}

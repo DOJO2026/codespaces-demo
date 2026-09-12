@@ -1,0 +1,200 @@
+name: Frontend Deployment
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  frontend:
+
+    runs-on: ubuntu-latest
+
+    env:
+
+      RESOURCE_GROUP: ${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}
+      APP_SERVICE_NAME: ${{ secrets.TF_VAR_FRONTEND_APP_NAME }}
+      BACKEND_APP_NAME: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
+
+    steps:
+
+      ##########################################################
+      # Checkout
+      ##########################################################
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ##########################################################
+      # Azure Login
+      ##########################################################
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      ##########################################################
+      # Validate Resource Group
+      ##########################################################
+
+      - name: Validate Resource Group
+
+        run: |
+
+          az group show \
+            --name "$RESOURCE_GROUP"
+
+      ##########################################################
+      # Validate Frontend App Service
+      ##########################################################
+
+      - name: Validate Frontend App Service
+
+        run: |
+
+          az webapp show \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$APP_SERVICE_NAME"
+
+      ##########################################################
+      # Start App Service
+      ##########################################################
+
+      - name: Start Frontend App Service
+
+        run: |
+
+          STATE=$(az webapp show \
+          --resource-group "$RESOURCE_GROUP" \
+          --name "$APP_SERVICE_NAME" \
+          --query state \
+          -o tsv)
+
+          if [ "$STATE" != "Running" ]; then
+
+            echo "Starting App Service..."
+
+            az webapp start \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$APP_SERVICE_NAME"
+
+          else
+
+            echo "App Service already running."
+
+          fi
+
+      ##########################################################
+      # Node
+      ##########################################################
+
+      - name: Setup Node
+
+        uses: actions/setup-node@v4
+
+        with:
+
+          node-version: 20
+
+          cache: npm
+
+          cache-dependency-path: frontend/package-lock.json
+
+      ##########################################################
+      # Install
+      ##########################################################
+
+      - name: Install Dependencies
+
+        working-directory: frontend
+
+        run: npm install
+
+      ##########################################################
+      # Generate Production Environment
+      ##########################################################
+
+      - name: Generate .env.production
+
+        working-directory: frontend
+
+        run: |
+
+          echo "VITE_API_URL=https://${BACKEND_APP_NAME}.azurewebsites.net" > .env.production
+
+          cat .env.production
+
+      ##########################################################
+      # Build React
+      ##########################################################
+
+      - name: Build React
+
+        working-directory: frontend
+
+        run: npm run build
+
+      ##########################################################
+      # Verify Build
+      ##########################################################
+
+      - name: Verify Dist Folder
+
+        run: |
+
+          ls -lh frontend/dist
+
+      ##########################################################
+      # Deploy
+      ##########################################################
+
+      - name: Deploy Frontend
+
+        uses: azure/webapps-deploy@v3
+
+        with:
+
+          app-name: ${{ secrets.TF_VAR_FRONTEND_APP_NAME }}
+
+          package: frontend/dist
+
+      ##########################################################
+      # Wait
+      ##########################################################
+
+      - name: Wait Deployment
+
+        run: sleep 30
+
+      ##########################################################
+      # Validate Website
+      ##########################################################
+
+      - name: Validate Frontend
+
+        run: |
+
+          curl --fail \
+          https://${{ secrets.TF_VAR_FRONTEND_APP_NAME }}.azurewebsites.net
+
+      ##########################################################
+      # Finished
+      ##########################################################
+
+      - name: Deployment Finished
+
+        run: |
+
+          echo "Frontend deployed successfully."
