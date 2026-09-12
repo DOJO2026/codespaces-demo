@@ -1,0 +1,131 @@
+# Refined Backend Deployment Workflow
+name: Backend Deployment
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    env:
+      RESOURCE_GROUP: ${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}
+      APP_SERVICE_NAME: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Resource Group
+        run: az group show --name "$RESOURCE_GROUP"
+
+      - name: Validate App Service
+        run: az webapp show --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
+
+      - name: Validate App Service Plan
+        run: az appservice plan list --resource-group "$RESOURCE_GROUP" --output table
+
+      - name: Start App Service If Needed
+        shell: bash
+        run: |
+          STATE=$(az webapp show --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME" --query state -o tsv)
+          if [ "$STATE" != "Running" ]; then
+            az webapp start --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
+          fi
+
+      - name: Configure App Settings
+        shell: bash
+        run: |
+          az webapp config appsettings set             --resource-group "$RESOURCE_GROUP"             --name "$APP_SERVICE_NAME"             --settings             SQL_SERVER_NAME="${{ secrets.TF_VAR_SQL_SERVER_NAME }}"             DATABASE_NAME="${{ secrets.TF_VAR_DATABASE_NAME }}"             SQL_ADMIN_LOGIN="${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}"             SQL_ADMIN_PASSWORD="${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}"             SPRING_PROFILES_ACTIVE=prod             WEBSITES_PORT=8080             SCM_DO_BUILD_DURING_DEPLOYMENT=false
+
+      - name: Verify App Settings
+        run: az webapp config appsettings list --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME" --output table
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Java Version
+        run: java -version
+
+      - name: Maven Version
+        working-directory: backend
+        run: ./mvnw --version
+
+      - name: Verify pom.xml
+        run: test -f backend/pom.xml
+
+      - name: Maven Clean
+        working-directory: backend
+        run: ./mvnw clean
+
+      - name: Maven Compile
+        working-directory: backend
+        run: ./mvnw compile
+
+      - name: Maven Test
+        working-directory: backend
+        run: ./mvnw test
+
+      - name: Maven Verify
+        working-directory: backend
+        run: ./mvnw verify
+
+      - name: Maven Package
+        working-directory: backend
+        run: ./mvnw package
+
+      - name: Locate JAR
+        id: jar
+        shell: bash
+        run: |
+          JAR=$(find backend/target -name "*.jar" ! -name "*original*" | head -n 1)
+          if [ -z "$JAR" ]; then
+            echo "No JAR found"
+            exit 1
+          fi
+          ls -lh "$JAR"
+          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Backend
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
+          package: ${{ steps.jar.outputs.jar }}
+
+      - name: Wait Startup
+        run: sleep 60
+
+      - name: Validate Demo Endpoint
+        run: curl --retry 10 --retry-delay 10 --fail https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/api/demo
+
+      - name: Validate Clientes Endpoint
+        run: curl --retry 10 --retry-delay 10 --fail https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/api/clientes
+
+      - name: Deployment Summary
+        run: |
+          echo "=================================="
+          echo "Backend Deployment Completed"
+          echo "Resource Group: $RESOURCE_GROUP"
+          echo "App Service: $APP_SERVICE_NAME"
+          echo "=================================="
