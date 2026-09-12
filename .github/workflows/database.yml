@@ -207,7 +207,6 @@ jobs:
             --resource-group "${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}" \
             --server "${{ secrets.TF_VAR_SQL_SERVER_NAME }}" \
             --name github-runner-${{ github.run_id }} \
-            --yes
 
       ############################################################
       # FINISHED
