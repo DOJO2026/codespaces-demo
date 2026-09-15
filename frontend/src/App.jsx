@@ -1,248 +1,136 @@
 import { useState } from "react";
-import axios from "axios";
 
-import "./App.css";
+import {
+  FaUsers,
+  FaLaptop,
+  FaServer,
+  FaSyncAlt,
+  FaExclamationCircle,
+} from "react-icons/fa";
 
-import Header from "./components/Header";
-import Dashboard from "./components/Dashboard";
+import Sidebar from "./components/layout/Sidebar";
+import Header from "./components/layout/Header";
+import ServiceCard from "./components/status/ServiceCard";
+import ClientesTable from "./components/tables/ClientesTable";
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { getClientes } from "./services/api";
+
+import "./styles/app.css";
 
 function App() {
-
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [backendConnected, setBackendConnected] = useState(false);
 
   const consultarClientes = async () => {
-
     setLoading(true);
+    setError("");
 
     try {
+      const data = await getClientes();
 
-  const response = await axios.get(
-    `${API_URL}/api/clientes`
-  );
+      setClientes(data);
+      setBackendConnected(true);
+    } catch (err) {
+      console.error("Error consultando clientes:", err);
 
-      setClientes(response.data);
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert("No se pudo conectar con el Backend.");
-
+      setClientes([]);
+      setBackendConnected(false);
+      setError("No se pudo consultar el backend.");
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   return (
+    <div className="app">
+      <Sidebar />
 
-    <div className="container">
+      <div className="main-area">
+        <Header />
 
-      {/* ========================= HEADER ========================= */}
+        <main className="content">
+          <section className="page-title">
+            <div className="title-icon">
+              <FaUsers />
+            </div>
 
-      <Header />
+            <div>
+              <h1>Clientes</h1>
+              <p>
+                Consulta y visualiza los clientes registrados en el sistema.
+              </p>
+            </div>
+          </section>
 
-      {/* ========================= DASHBOARD ========================= */}
+          <section className="services">
+            <ServiceCard
+              icon={<FaLaptop />}
+              title="Frontend"
+              technology="React + Vite"
+              status="Disponible"
+              detail={window.location.host}
+              connected={true}
+            />
 
-      <Dashboard />
+            <ServiceCard
+              icon={<FaServer />}
+              title="Backend"
+              technology="Spring Boot"
+              status={backendConnected ? "Conectado" : "No conectado"}
+              detail={
+                import.meta.env.VITE_API_URL || "http://localhost:8080"
+              }
+              connected={backendConnected}
+            />
+          </section>
 
-      {/* ========================= LOGS ========================= */}
+          <section className="clients-panel">
+            <div className="panel-header">
+              <div>
+                <h2>Listado de Clientes</h2>
+                <p>
+                  Obtiene la información directamente desde el backend.
+                </p>
+              </div>
 
-      <div className="logs">
+              <button
+                className="primary-button"
+                onClick={consultarClientes}
+                disabled={loading}
+              >
+                <FaSyncAlt className={loading ? "spin" : ""} />
 
-        <h3>Estado del Sistema</h3>
+                {loading ? "Consultando..." : "Consultar clientes"}
+              </button>
+            </div>
 
-        <p>🟢 Frontend ................. ONLINE</p>
+            {error && (
+              <div className="error-message">
+                <FaExclamationCircle />
 
-        <p>🟢 Backend ................. ONLINE</p>
+                <div>
+                  <strong>{error}</strong>
+                  <span>
+                    Verifica que el backend esté disponible y que la URL sea
+                    correcta.
+                  </span>
+                </div>
+              </div>
+            )}
 
-        <p>🟢 Azure SQL ............... CONNECTED</p>
+            <ClientesTable clientes={clientes} />
+          </section>
+        </main>
 
-        <p>🟢 Spring Boot ............. RUNNING</p>
-
-        <p>🟢 GitHub Actions .......... READY</p>
-
-        <p>🟢 Terraform ............... APPLIED</p>
-
-        <p>🟡 Key Vault ............... PENDING</p>
-
-        <p>🟡 OpenTelemetry ........... PENDING</p>
-
-        <p>🟡 Application Insights .... PENDING</p>
-
-        <p>🟡 Log Analytics ........... PENDING</p>
-
-        <br />
-
-        <p><strong>Environment:</strong> DEV</p>
-
-        <p><strong>Azure Region:</strong> East US 2</p>
-
+        <footer>
+          <span>© 2026 DOJO - Demo DevSecOps</span>
+          <span>React + Vite | Azure | Spring Boot</span>
+        </footer>
       </div>
-
-      {/* ========================= BOTON ========================= */}
-
-      <div className="actions">
-
-        <button onClick={consultarClientes}>
-
-          {loading
-            ? "Consultando Azure SQL..."
-            : "Consultar Azure SQL"}
-
-        </button>
-
-      </div>
-
-      {/* ========================= TABLA ========================= */}
-
-      {clientes.length > 0 && (
-
-        <div className="card">
-
-          <h3>Clientes Registrados</h3>
-
-          <p
-            style={{
-              marginBottom: "25px",
-              color: "#8fd3ff",
-              fontSize: "18px"
-            }}
-          >
-
-            Total de registros encontrados:
-            <strong> {clientes.length}</strong>
-
-          </p>
-
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>ID</th>
-
-                <th>Nombre</th>
-
-                <th>Correo</th>
-
-                <th>Estado</th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {clientes.map((cliente) => (
-
-                <tr key={cliente.id}>
-
-                  <td>{cliente.id}</td>
-
-                  <td>{cliente.nombre}</td>
-
-                  <td>{cliente.correo}</td>
-
-                  <td>
-
-                    <span className="online">
-
-                      ● ACTIVO
-
-                    </span>
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      )}
-
-      {/* ========================= ARQUITECTURA ========================= */}
-
-      <div className="card">
-
-        <h3>Arquitectura DevSecOps</h3>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-around",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "20px",
-            marginTop: "25px"
-          }}
-        >
-
-          <div>
-            <h2>⚛️</h2>
-            <p>React</p>
-          </div>
-
-          <h2>➡️</h2>
-
-          <div>
-            <h2>☕</h2>
-            <p>Spring Boot</p>
-          </div>
-
-          <h2>➡️</h2>
-
-          <div>
-            <h2>🗄️</h2>
-            <p>Azure SQL</p>
-          </div>
-
-          <h2>➡️</h2>
-
-          <div>
-            <h2>☁️</h2>
-            <p>App Service</p>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* ========================= FOOTER ========================= */}
-
-      <div className="footer">
-
-        <h3>Powered By</h3>
-
-        <br />
-
-        Terraform • GitHub Actions • Azure • Spring Boot • React • Azure SQL
-
-        <br /><br />
-
-        <small>
-
-          Codespaces DevSecOps Dashboard v1.0.0
-
-        </small>
-
-      </div>
-
     </div>
-
   );
-
 }
 
 export default App;
