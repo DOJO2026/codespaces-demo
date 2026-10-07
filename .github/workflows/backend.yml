@@ -8,6 +8,13 @@ on:
     branches:
       - main
     paths:
+      # This now only watches changes to THIS repo's own files (infra,
+      # other workflows, etc.) - a push to the separate DOJO2026/backend
+      # repo does NOT trigger this automatically (GitHub Actions can only
+      # watch paths within the repo the workflow lives in). See the note
+      # at the bottom of this file for how to wire that up if you want
+      # auto-deploy on push to the backend repo too; until then, use
+      # "Run workflow" (workflow_dispatch) to deploy after pushing there.
       - "backend/**"
 
 permissions:
@@ -23,8 +30,17 @@ jobs:
       APP_SERVICE_NAME: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
 
     steps:
-      - name: Checkout
+      - name: Checkout Infra Repo
         uses: actions/checkout@v4
+
+      # Backend source now lives in its own repo (DOJO2026/backend, public)
+      # - cloned here into ./backend-src rather than read from a local
+      # folder. No token needed since the repo is public.
+      - name: Checkout Backend Repo
+        uses: actions/checkout@v4
+        with:
+          repository: DOJO2026/backend
+          path: backend-src
 
       - name: Azure Login
         uses: azure/login@v2
@@ -53,7 +69,17 @@ jobs:
       - name: Configure App Settings
         shell: bash
         run: |
-          az webapp config appsettings set             --resource-group "$RESOURCE_GROUP"             --name "$APP_SERVICE_NAME"             --settings             SQL_SERVER_NAME="${{ secrets.TF_VAR_SQL_SERVER_NAME }}"             DATABASE_NAME="${{ secrets.TF_VAR_DATABASE_NAME }}"             SQL_ADMIN_LOGIN="${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}"             SQL_ADMIN_PASSWORD="${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}"             SPRING_PROFILES_ACTIVE=prod             WEBSITES_PORT=8080             SCM_DO_BUILD_DURING_DEPLOYMENT=false
+          az webapp config appsettings set \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$APP_SERVICE_NAME" \
+            --settings \
+            SQL_SERVER_NAME="${{ secrets.TF_VAR_SQL_SERVER_NAME }}" \
+            DATABASE_NAME="${{ secrets.TF_VAR_DATABASE_NAME }}" \
+            SQL_ADMIN_LOGIN="${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}" \
+            SQL_ADMIN_PASSWORD="${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}" \
+            SPRING_PROFILES_ACTIVE=prod \
+            WEBSITES_PORT=8080 \
+            SCM_DO_BUILD_DURING_DEPLOYMENT=false
 
       - name: Verify App Settings
         run: az webapp config appsettings list --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME" --output table
@@ -64,42 +90,43 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
+          cache-dependency-path: backend-src/pom.xml
 
       - name: Java Version
         run: java -version
 
       - name: Maven Version
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw --version
 
       - name: Verify pom.xml
-        run: test -f backend/pom.xml
+        run: test -f backend-src/pom.xml
 
       - name: Maven Clean
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw clean
 
       - name: Maven Compile
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw compile
 
       - name: Maven Test
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw test
 
       - name: Maven Verify
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw verify
 
       - name: Maven Package
-        working-directory: backend
+        working-directory: backend-src
         run: ./mvnw package
 
       - name: Locate JAR
         id: jar
         shell: bash
         run: |
-          JAR=$(find backend/target -name "*.jar" ! -name "*original*" | head -n 1)
+          JAR=$(find backend-src/target -name "*.jar" ! -name "*original*" | head -n 1)
           if [ -z "$JAR" ]; then
             echo "No JAR found"
             exit 1
@@ -129,3 +156,15 @@ jobs:
           echo "Resource Group: $RESOURCE_GROUP"
           echo "App Service: $APP_SERVICE_NAME"
           echo "=================================="
+
+# NOTE on auto-triggering from the backend repo:
+# A push to DOJO2026/backend cannot trigger a workflow that lives in
+# codespaces-demo via the normal `on: push:` mechanism - GitHub only
+# watches the repo the workflow file is in. Two options if you want that:
+#   1. Keep it manual: click "Run workflow" here after pushing to backend.
+#   2. Add a tiny workflow INSIDE the backend repo that, on push to main,
+#      calls `gh workflow run backend.yml --repo DOJO2026/codespaces-demo`
+#      (needs a PAT with `repo` + `workflow` scope on codespaces-demo,
+#      stored as a secret in the backend repo - this is the one piece that
+#      can't avoid a cross-repo credential, since GITHUB_TOKEN can't
+#      trigger workflows in a different repo).
