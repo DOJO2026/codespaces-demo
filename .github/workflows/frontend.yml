@@ -3,19 +3,6 @@ name: Frontend Deployment
 on:
   workflow_dispatch:
 
-  push:
-    branches:
-      - main
-    paths:
-      # This now only watches changes to THIS repo's own files (infra,
-      # other workflows, etc.) - a push to the separate DOJO2026/frontend
-      # repo does NOT trigger this automatically (GitHub Actions can only
-      # watch paths within the repo the workflow lives in). See the note
-      # at the bottom of this file for how to wire that up if you want
-      # auto-deploy on push to the frontend repo too; until then, use
-      # "Run workflow" (workflow_dispatch) to deploy after pushing there.
-      - "frontend/**"
-
 permissions:
   id-token: write
   contents: read
