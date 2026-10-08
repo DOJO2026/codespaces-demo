@@ -42,6 +42,15 @@ jobs:
           repository: DOJO2026/backend
           path: backend-src
 
+      # When a project is split into a brand-new repo, the git executable
+      # bit (+x) on mvnw is often lost in the process (depends on how the
+      # files were added to the new repo) - even though it was fine in the
+      # old monorepo. Rather than depend on the backend repo's own git
+      # history/permissions, force it here every run so this never breaks
+      # again regardless of what happens on the backend repo's side.
+      - name: Make mvnw Executable
+        run: chmod +x backend-src/mvnw
+
       - name: Azure Login
         uses: azure/login@v2
         with:
