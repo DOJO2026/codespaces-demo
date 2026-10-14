@@ -1,5 +1,8 @@
 name: Frontend Deployment
 
+# Manual only - no push trigger. The frontend source lives in its own repo
+# (DOJO2026/FRONT_V2), so there's nothing in THIS repo for a push trigger to
+# watch. Deploy explicitly with "Run workflow" after pushing there.
 on:
   workflow_dispatch:
 
@@ -27,9 +30,9 @@ jobs:
       - name: Checkout Infra Repo
         uses: actions/checkout@v4
 
-      # Frontend source now lives in its own repo (DOJO2026/frontend,
-      # public) - cloned here into ./frontend-src rather than read from a
-      # local folder. No token needed since the repo is public.
+      # Frontend source now lives in its own repo (DOJO2026/FRONT_V2,
+      # Angular 20) - cloned here into ./frontend-src rather than read from
+      # a local folder. No token needed since the repo is public.
       - name: Checkout Frontend Repo
         uses: actions/checkout@v4
         with:
@@ -92,14 +95,11 @@ jobs:
       # Configure Startup Command
       ####################################################
 
-      # A Vite/React build is just static files (dist/), not a Node server -
-      # without an explicit startup command, the Linux Node runtime has
-      # nothing to run and the site sits on the default "waiting for
-      # content" page forever, even after a perfectly successful deploy.
-      # `pm2 serve` ships built into the Azure App Service Node image, so
-      # this needs no extra dependency - it just serves /home/site/wwwroot
-      # as static files, with --spa enabling client-side routing fallback
-      # to index.html. Idempotent - safe to run on every deploy.
+      # Same as before: an Angular production build is just static files
+      # (dist/front-v2/browser), not a Node server - pm2 serve ships built
+      # into the Azure Node runtime image and needs no extra dependency.
+      # --spa enables client-side routing fallback to index.html.
+      # Idempotent - safe to run on every deploy.
       - name: Configure Startup Command
         run: |
           az webapp config set \
@@ -127,22 +127,32 @@ jobs:
         run: npm install
 
       ####################################################
-      # Generate Production Environment
+      # Inject Backend URL
       ####################################################
 
-      - name: Generate .env.production
+      # Angular has no .env mechanism like Vite - the equivalent is
+      # fileReplacements in angular.json, which swaps
+      # src/environments/environment.ts for environment.prod.ts on a
+      # "production" build. environment.prod.ts ships with a placeholder
+      # (__API_BASE_URL__) committed in the repo; this step swaps that
+      # placeholder for the real backend URL right before building, so the
+      # real URL is never hardcoded in the repo itself. Requires the two
+      # environment files + the fileReplacements entry in angular.json to
+      # already exist in the frontend repo (see chat for the exact content).
+      - name: Inject Backend URL
         working-directory: frontend-src
         run: |
-
-          echo "VITE_API_URL=https://${BACKEND_APP_NAME}.azurewebsites.net" > .env.production
-
-          cat .env.production
+          sed -i "s|__API_BASE_URL__|https://${BACKEND_APP_NAME}.azurewebsites.net|g" src/environments/environment.prod.ts
+          cat src/environments/environment.prod.ts
 
       ####################################################
       # Build
       ####################################################
 
-      - name: Build React
+      # "npm run build" -> "ng build", which uses the "production"
+      # configuration by default (defaultConfiguration in angular.json) -
+      # that's the configuration that applies the fileReplacements above.
+      - name: Build Angular
         working-directory: frontend-src
         run: npm run build
 
@@ -150,10 +160,14 @@ jobs:
       # Verify Dist
       ####################################################
 
+      # Angular's newer esbuild-based builder (@angular/build:application)
+      # outputs to dist/<project-name>/browser (adds the "browser"
+      # subfolder even without SSR) instead of dist/<project-name> directly.
+      # Project name here is "front-v2" (from angular.json).
       - name: Verify Dist Folder
         run: |
 
-          ls -lah frontend-src/dist
+          ls -lah frontend-src/dist/front-v2/browser
 
       ####################################################
       # Create ZIP
@@ -161,11 +175,11 @@ jobs:
 
       - name: Create Deployment ZIP
 
-        working-directory: frontend-src/dist
+        working-directory: frontend-src/dist/front-v2/browser
 
         run: |
 
-          zip -r ../../frontend.zip .
+          zip -r ../../../../frontend.zip .
 
       ####################################################
       # Verify ZIP
@@ -234,20 +248,8 @@ jobs:
         run: |
 
           echo "========================================"
-          echo "Frontend Deployment Completed"
+          echo "Frontend Deployment Completed (FRONT_V2 / Angular)"
           echo "Resource Group : $RESOURCE_GROUP"
           echo "App Service    : $APP_SERVICE_NAME"
           echo "Backend URL    : https://${BACKEND_APP_NAME}.azurewebsites.net"
           echo "========================================"
-
-# NOTE on auto-triggering from the frontend repo:
-# A push to DOJO2026/frontend cannot trigger a workflow that lives in
-# codespaces-demo via the normal `on: push:` mechanism - GitHub only
-# watches the repo the workflow file is in. Two options if you want that:
-#   1. Keep it manual: click "Run workflow" here after pushing to frontend.
-#   2. Add a tiny workflow INSIDE the frontend repo that, on push to main,
-#      calls `gh workflow run frontend.yml --repo DOJO2026/codespaces-demo`
-#      (needs a PAT with `repo` + `workflow` scope on codespaces-demo,
-#      stored as a secret in the frontend repo - this is the one piece that
-#      can't avoid a cross-repo credential, since GITHUB_TOKEN can't
-#      trigger workflows in a different repo). Same pattern as backend.yml.
