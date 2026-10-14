@@ -33,7 +33,7 @@ jobs:
       - name: Checkout Frontend Repo
         uses: actions/checkout@v4
         with:
-          repository: DOJO2026/frontend
+          repository: DOJO2026/FRONT_V2
           path: frontend-src
 
       ####################################################
