@@ -29,6 +29,14 @@ resource "azurerm_linux_web_app" "this" {
 
       node_version = var.RUNTIME == "NODE" ? "20-lts" : null
 
+      # FastAPI backend. No app_command_line override here on purpose -
+      # same pattern you already use for NODE: the startup command
+      # (uvicorn, in this case) gets set from backend.yml via
+      # `az webapp config set --startup-file`, not from Terraform, so it
+      # lives next to the rest of the deploy-time configuration instead
+      # of being split across two places.
+      python_version = var.RUNTIME == "PYTHON" ? "3.12" : null
+
     }
 
   }
