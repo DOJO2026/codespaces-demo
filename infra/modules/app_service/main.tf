@@ -18,6 +18,7 @@ resource "azurerm_linux_web_app" "this" {
 
     application_stack {
 
+      # "Junior gonzalo quiñlones ramirez"
       # The azurerm provider requires java_server, java_server_version AND
       # java_version to all be set together (or all left null) - setting
       # java_version alone fails validation. "JAVA" as the server means
