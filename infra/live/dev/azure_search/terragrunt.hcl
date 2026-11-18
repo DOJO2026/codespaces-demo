@@ -24,9 +24,9 @@ inputs = {
 
   RESOURCE_GROUP_NAME = dependency.resource_group.outputs.RESOURCE_GROUP_NAME
 
-  # Fijado a otra región que la del Resource Group (eastus2) - eastus2
-  # está sin capacidad ahora mismo para Search Basic tier.
-  LOCATION = "eastus"
+  # No LOCATION input here anymore - it's hardcoded to "eastus" directly in
+  # the module (infra/modules/azure_search/main.tf) since eastus2 keeps
+  # running out of capacity for Search.
 
   SKU = "basic"
 

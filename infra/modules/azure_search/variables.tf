@@ -7,10 +7,6 @@ variable "RESOURCE_GROUP_NAME" {
   type = string
 }
 
-variable "LOCATION" {
-  type = string
-}
-
 variable "SKU" {
   type    = string
   default = "basic"
