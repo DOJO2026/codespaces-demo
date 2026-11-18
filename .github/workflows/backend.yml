@@ -1,4 +1,4 @@
-# Refined Backend Deployment Workflow
+# Backend Deployment Workflow - Python / FastAPI
 name: Backend Deployment
 
 on:
@@ -20,23 +20,15 @@ jobs:
       - name: Checkout Infra Repo
         uses: actions/checkout@v4
 
-      # Backend source now lives in its own repo (DOJO2026/backend, public)
-      # - cloned here into ./backend-src rather than read from a local
-      # folder. No token needed since the repo is public.
+      # Backend source lives in its own repo (DOJO2026/Backend_Python_API,
+      # FastAPI) - cloned here into ./backend-src, same clone-based pattern
+      # as before. No token needed if the repo is public; if it's private,
+      # add a `token:` here pointing at a PAT secret.
       - name: Checkout Backend Repo
         uses: actions/checkout@v4
         with:
-          repository: DOJO2026/backend
+          repository: DOJO2026/Backend_Python_API
           path: backend-src
-
-      # When a project is split into a brand-new repo, the git executable
-      # bit (+x) on mvnw is often lost in the process (depends on how the
-      # files were added to the new repo) - even though it was fine in the
-      # old monorepo. Rather than depend on the backend repo's own git
-      # history/permissions, force it here every run so this never breaks
-      # again regardless of what happens on the backend repo's side.
-      - name: Make mvnw Executable
-        run: chmod +x backend-src/mvnw
 
       - name: Azure Login
         uses: azure/login@v2
@@ -62,105 +54,73 @@ jobs:
             az webapp start --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
           fi
 
-      - name: Configure App Settings
-        shell: bash
+      # FastAPI is just an ASGI app - nothing runs it unless we tell Azure
+      # how. requirements.txt only has uvicorn (no gunicorn), so this runs
+      # uvicorn directly. Fine for a dev/demo workload; swap for
+      # gunicorn -k uvicorn.workers.UvicornWorker later if you need
+      # multiple workers. Idempotent - safe to run on every deploy.
+      - name: Configure Startup Command
         run: |
-          az webapp config appsettings set \
+          az webapp config set \
             --resource-group "$RESOURCE_GROUP" \
             --name "$APP_SERVICE_NAME" \
-            --settings \
-            SQL_SERVER_NAME="${{ secrets.TF_VAR_SQL_SERVER_NAME }}" \
-            DATABASE_NAME="${{ secrets.TF_VAR_DATABASE_NAME }}" \
-            SQL_ADMIN_LOGIN="${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}" \
-            SQL_ADMIN_PASSWORD="${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}" \
-            SPRING_PROFILES_ACTIVE=prod \
-            WEBSITES_PORT=8080 \
-            SCM_DO_BUILD_DURING_DEPLOYMENT=false
+            --startup-file "uvicorn main:app --host 0.0.0.0 --port 8000"
 
+      # AZURE_OAI_*, AZURE_SEARCH_* and SCM_DO_BUILD_DURING_DEPLOYMENT are
+      # NOT set here anymore - they're set by infra.yml, straight from the
+      # azure_openai/azure_search Terraform outputs into APP_SETTINGS in
+      # backend/terragrunt.hcl. This step just confirms they actually
+      # landed before we deploy code on top of them.
       - name: Verify App Settings
         run: az webapp config appsettings list --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME" --output table
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: maven
-          cache-dependency-path: backend-src/pom.xml
+      - name: Verify requirements.txt
+        run: test -f backend-src/requirements.txt
 
-      - name: Java Version
-        run: java -version
-
-      - name: Maven Version
+      # No build step here on purpose: zipping the raw source and letting
+      # Oryx (SCM_DO_BUILD_DURING_DEPLOYMENT=true above) run
+      # "pip install -r requirements.txt" remotely, inside the App Service's
+      # own Linux/Python image, is the standard pattern for Python App
+      # Service deploys - unlike the Java JAR or the Angular dist/, there's
+      # nothing to compile in CI.
+      - name: Create Deployment ZIP
         working-directory: backend-src
-        run: ./mvnw --version
-
-      - name: Verify pom.xml
-        run: test -f backend-src/pom.xml
-
-      - name: Maven Clean
-        working-directory: backend-src
-        run: ./mvnw clean
-
-      - name: Maven Compile
-        working-directory: backend-src
-        run: ./mvnw compile
-
-      - name: Maven Test
-        working-directory: backend-src
-        run: ./mvnw test
-
-      - name: Maven Verify
-        working-directory: backend-src
-        run: ./mvnw verify
-
-      - name: Maven Package
-        working-directory: backend-src
-        run: ./mvnw package
-
-      - name: Locate JAR
-        id: jar
-        shell: bash
         run: |
-          JAR=$(find backend-src/target -name "*.jar" ! -name "*original*" | head -n 1)
-          if [ -z "$JAR" ]; then
-            echo "No JAR found"
-            exit 1
-          fi
-          ls -lh "$JAR"
-          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+          zip -r ../backend.zip . \
+            -x ".git/*" ".github/*" ".devcontainer/*" ".env" "__pycache__/*" "*.pyc"
+
+      - name: Verify ZIP
+        run: ls -lh backend.zip
 
       - name: Deploy Backend
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
-          package: ${{ steps.jar.outputs.jar }}
+        run: |
+          az webapp deploy \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$APP_SERVICE_NAME" \
+            --src-path backend.zip \
+            --type zip
 
+      - name: Restart App Service
+        run: az webapp restart --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
+
+      # Longer wait than before: Oryx building the Python environment
+      # remotely (pip install) takes noticeably longer than restarting a
+      # pre-built JAR or static files.
       - name: Wait Startup
-        run: sleep 60
+        run: sleep 90
 
-      - name: Validate Demo Endpoint
-        run: curl --retry 10 --retry-delay 10 --fail https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/api/demo
-
-      - name: Validate Clientes Endpoint
-        run: curl --retry 10 --retry-delay 10 --fail https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/api/clientes
+      # FastAPI always serves /openapi.json once the app object imports
+      # successfully, regardless of which routes main.py defines - a
+      # reliable health check that doesn't depend on knowing the real
+      # endpoint names yet.
+      - name: Validate FastAPI is Up
+        run: curl --retry 10 --retry-delay 10 --fail https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/openapi.json
 
       - name: Deployment Summary
         run: |
           echo "=================================="
-          echo "Backend Deployment Completed"
+          echo "Backend Deployment Completed (Backend_Python_API / FastAPI)"
           echo "Resource Group: $RESOURCE_GROUP"
           echo "App Service: $APP_SERVICE_NAME"
+          echo "Docs: https://${{ secrets.TF_VAR_BACKEND_APP_NAME }}.azurewebsites.net/docs"
           echo "=================================="
-
-# NOTE on auto-triggering from the backend repo:
-# A push to DOJO2026/backend cannot trigger a workflow that lives in
-# codespaces-demo via the normal `on: push:` mechanism - GitHub only
-# watches the repo the workflow file is in. Two options if you want that:
-#   1. Keep it manual: click "Run workflow" here after pushing to backend.
-#   2. Add a tiny workflow INSIDE the backend repo that, on push to main,
-#      calls `gh workflow run backend.yml --repo DOJO2026/codespaces-demo`
-#      (needs a PAT with `repo` + `workflow` scope on codespaces-demo,
-#      stored as a secret in the backend repo - this is the one piece that
-#      can't avoid a cross-repo credential, since GITHUB_TOKEN can't
-#      trigger workflows in a different repo).
