@@ -34,8 +34,8 @@ inputs = {
   # assign it.
   DEPLOYMENT_NAME = "chat-deployment"
 
-  MODEL_NAME     = "gpt-4o-mini"
-  MODEL_VERSION  = "2024-07-18"
+  MODEL_NAME     = "gpt-5-mini"
+  MODEL_VERSION  = "2025-08-07"
   MODEL_CAPACITY = 1
 
   TAGS = {
