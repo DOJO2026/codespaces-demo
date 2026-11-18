@@ -191,6 +191,29 @@ jobs:
           echo "No orphaned SQL Server found in the wrong region - nothing to clean up."
         fi
 
+    - name: Purge Soft-Deleted OpenAI Account If Needed
+
+      # The azure_openai Cognitive Services account has repeatedly ended up
+      # soft-deleted between runs (even when nobody explicitly deleted it),
+      # which then blocks re-creation with a 409 "FlagMustBeSetForRestore"
+      # error. Rather than purging it by hand in Cloud Shell every time,
+      # this checks for a soft-deleted account with this name and purges it
+      # automatically before apply. Idempotent - a no-op when nothing is
+      # soft-deleted.
+      run: |
+        DELETED_COUNT=$(az cognitiveservices account list-deleted \
+          --query "[?name=='$TF_VAR_OPENAI_ACCOUNT_NAME'] | length(@)" -o tsv)
+
+        if [ "$DELETED_COUNT" != "0" ]; then
+          echo "Found a soft-deleted OpenAI account named $TF_VAR_OPENAI_ACCOUNT_NAME - purging it."
+          az cognitiveservices account purge \
+            --name "$TF_VAR_OPENAI_ACCOUNT_NAME" \
+            --resource-group "$TF_VAR_RESOURCE_GROUP_NAME" \
+            --location eastus2
+        else
+          echo "No soft-deleted OpenAI account found - nothing to purge."
+        fi
+
     - name: Terragrunt Apply
 
       # `--auto-approve` isn't a Terragrunt flag - it must be forwarded to
