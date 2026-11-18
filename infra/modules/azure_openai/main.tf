@@ -6,9 +6,6 @@ resource "azurerm_cognitive_account" "this" {
   kind     = "OpenAI"
   sku_name = var.SKU_NAME
 
-  # No private networking in this demo yet - the backend reaches this
-  # over the public endpoint using the key, same trust model as the
-  # SQL server.
   public_network_access_enabled = true
 
   tags = var.TAGS
@@ -25,7 +22,7 @@ resource "azurerm_cognitive_deployment" "this" {
   }
 
   sku {
-    name     = "Standard"
+    name     = "GlobalStandard"
     capacity = var.MODEL_CAPACITY
   }
 }
