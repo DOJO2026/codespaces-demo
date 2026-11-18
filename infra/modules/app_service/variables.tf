@@ -26,6 +26,8 @@ variable "ALWAYS_ON" {
 variable "APP_SETTINGS" {
   type    = map(string)
   default = {}
+  sensitive = true
+
 }
 
 variable "TAGS" {
