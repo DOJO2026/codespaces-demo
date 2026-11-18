@@ -24,7 +24,9 @@ inputs = {
 
   RESOURCE_GROUP_NAME = dependency.resource_group.outputs.RESOURCE_GROUP_NAME
 
-  LOCATION = dependency.resource_group.outputs.LOCATION
+  # Fijado a otra región que la del Resource Group (eastus2) - eastus2
+  # está sin capacidad ahora mismo para Search Basic tier.
+  LOCATION = "eastus"
 
   SKU = "basic"
 

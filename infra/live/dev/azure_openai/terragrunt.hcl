@@ -24,7 +24,7 @@ inputs = {
 
   RESOURCE_GROUP_NAME = dependency.resource_group.outputs.RESOURCE_GROUP_NAME
 
-  LOCATION = "eastus"
+  LOCATION = dependency.resource_group.outputs.LOCATION
 
   SKU_NAME = "S0"
 
