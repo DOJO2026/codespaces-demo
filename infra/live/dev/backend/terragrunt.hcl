@@ -78,7 +78,10 @@ inputs = {
   ALWAYS_ON = true
 
   APP_SETTINGS = {
-    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+    # false: el venv ya viene armado (antenv) dentro del zip que sube
+    # backend.yml, compilado en el runner de GitHub Actions - no hace
+    # falta (ni conviene) que Azure intente reconstruirlo en el plan B1.
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "false"
 
     AZURE_OAI_ENDPOINT             = dependency.azure_openai.outputs.ENDPOINT
     AZURE_OAI_KEY                  = dependency.azure_openai.outputs.PRIMARY_KEY

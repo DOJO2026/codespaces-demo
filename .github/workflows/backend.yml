@@ -66,9 +66,9 @@ jobs:
             --name "$APP_SERVICE_NAME" \
             --startup-file "uvicorn main:app --host 0.0.0.0 --port 8000"
 
-      # AZURE_OAI_*, AZURE_SEARCH_* and SCM_DO_BUILD_DURING_DEPLOYMENT are
-      # NOT set here anymore - they're set by infra.yml, straight from the
-      # azure_openai/azure_search Terraform outputs into APP_SETTINGS in
+      # AZURE_OAI_*, AZURE_SEARCH_*, AZURE_SQL_*, AZURE_STORAGE_* and
+      # SCM_DO_BUILD_DURING_DEPLOYMENT are NOT set here - they're set by
+      # infra.yml, straight from Terraform outputs into APP_SETTINGS in
       # backend/terragrunt.hcl. This step just confirms they actually
       # landed before we deploy code on top of them.
       - name: Verify App Settings
@@ -77,12 +77,36 @@ jobs:
       - name: Verify requirements.txt
         run: test -f backend-src/requirements.txt
 
-      # No build step here on purpose: zipping the raw source and letting
-      # Oryx (SCM_DO_BUILD_DURING_DEPLOYMENT=true above) run
-      # "pip install -r requirements.txt" remotely, inside the App Service's
-      # own Linux/Python image, is the standard pattern for Python App
-      # Service deploys - unlike the Java JAR or the Angular dist/, there's
-      # nothing to compile in CI.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # pyodbc/aioodbc need the unixODBC headers to build their C
+      # extension wheel.
+      - name: Install ODBC Build Dependencies
+        run: sudo apt-get update && sudo apt-get install -y unixodbc-dev
+
+      # Build the virtualenv HERE, in the Actions runner (plenty of
+      # RAM/CPU), instead of letting Azure's Oryx build it remotely on the
+      # App Service's own B1 plan. B1 is the smallest/cheapest SKU, and the
+      # remote Oryx build was dying silently partway through the install
+      # (no antenv, no __oryx_packages__ ever got created - "uvicorn: not
+      # found" at startup) - consistent with an out-of-memory kill while
+      # installing the heavier packages (sqlalchemy, pyodbc, openai,
+      # azure-storage-blob...). Building a venv named "antenv" and shipping
+      # it pre-built sidesteps that entirely: Oryx's generated startup.sh on
+      # the App Service side auto-detects and activates any folder named
+      # exactly "antenv", so no remote build happens at all
+      # (SCM_DO_BUILD_DURING_DEPLOYMENT is now "false" in Terraform).
+      - name: Build Virtual Environment
+        working-directory: backend-src
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Create Deployment ZIP
         working-directory: backend-src
         run: |
@@ -103,11 +127,8 @@ jobs:
       - name: Restart App Service
         run: az webapp restart --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
 
-      # Longer wait than before: Oryx building the Python environment
-      # remotely (pip install) takes noticeably longer than restarting a
-      # pre-built JAR or static files.
       - name: Wait Startup
-        run: sleep 90
+        run: sleep 60
 
       # FastAPI always serves /openapi.json once the app object imports
       # successfully, regardless of which routes main.py defines - a
