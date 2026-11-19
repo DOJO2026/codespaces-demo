@@ -82,6 +82,7 @@ inputs = {
     # backend.yml, compilado en el runner de GitHub Actions - no hace
     # falta (ni conviene) que Azure intente reconstruirlo en el plan B1.
     SCM_DO_BUILD_DURING_DEPLOYMENT = "false"
+    WEBSITE_RUN_FROM_PACKAGE        = "1"
 
     AZURE_OAI_ENDPOINT             = dependency.azure_openai.outputs.ENDPOINT
     AZURE_OAI_KEY                  = dependency.azure_openai.outputs.PRIMARY_KEY
