@@ -122,7 +122,8 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --name "$APP_SERVICE_NAME" \
             --src-path backend.zip \
-            --type zip
+            --type zip \
+            --track-status false
 
       - name: Restart App Service
         run: az webapp restart --resource-group "$RESOURCE_GROUP" --name "$APP_SERVICE_NAME"
