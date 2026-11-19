@@ -7,7 +7,7 @@ dependency "resource_group" {
 
   mock_outputs = {
     RESOURCE_GROUP_NAME = "mock-resource-group"
-    LOCATION             = "eastus2"
+    LOCATION            = "eastus2"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 }
@@ -17,31 +17,25 @@ terraform {
 }
 
 inputs = {
-
-  # Must be globally unique (it's part of the endpoint hostname). Comes
-  # from a GitHub secret, same pattern as TF_VAR_BACKEND_APP_NAME.
-  NAME = get_env("TF_VAR_OPENAI_ACCOUNT_NAME")
-
+  NAME                = get_env("TF_VAR_OPENAI_ACCOUNT_NAME")
   RESOURCE_GROUP_NAME = dependency.resource_group.outputs.RESOURCE_GROUP_NAME
-
-  LOCATION = dependency.resource_group.outputs.LOCATION
+  LOCATION            = dependency.resource_group.outputs.LOCATION
 
   SKU_NAME = "S0"
 
-  # This is the exact string that ends up as AZURE_OAI_DEPLOYMENT in the
-  # backend's app settings (wired automatically via the dependency block
-  # in backend/terragrunt.hcl) - you're choosing this name, Azure doesn't
-  # assign it.
   DEPLOYMENT_NAME = "chat-deployment"
+  MODEL_NAME      = "gpt-5-mini"
+  MODEL_VERSION   = "2025-08-07"
+  MODEL_CAPACITY  = 1
 
-  MODEL_NAME     = "gpt-5-mini"
-  MODEL_VERSION  = "2025-08-07"
-  MODEL_CAPACITY = 1
+  EMBEDDING_DEPLOYMENT_NAME = "embedding-deployment"
+  EMBEDDING_MODEL_NAME      = "text-embedding-ada-002"
+  EMBEDDING_MODEL_VERSION   = "2"
+  EMBEDDING_MODEL_CAPACITY  = 1
 
   TAGS = {
     Environment = "DEV"
     Project     = "Codespaces-Demo"
     Owner       = "DOJO2026"
   }
-
 }

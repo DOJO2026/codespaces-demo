@@ -26,3 +26,19 @@ resource "azurerm_cognitive_deployment" "this" {
     capacity = var.MODEL_CAPACITY
   }
 }
+
+resource "azurerm_cognitive_deployment" "embedding" {
+  name                 = var.EMBEDDING_DEPLOYMENT_NAME
+  cognitive_account_id = azurerm_cognitive_account.this.id
+
+  model {
+    format  = "OpenAI"
+    name    = var.EMBEDDING_MODEL_NAME
+    version = var.EMBEDDING_MODEL_VERSION
+  }
+
+  sku {
+    name     = "GlobalStandard"
+    capacity = var.EMBEDDING_MODEL_CAPACITY
+  }
+}

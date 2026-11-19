@@ -10,3 +10,7 @@ output "PRIMARY_KEY" {
 output "DEPLOYMENT_NAME" {
   value = azurerm_cognitive_deployment.this.name
 }
+
+output "EMBEDDING_DEPLOYMENT_NAME" {
+  value = azurerm_cognitive_deployment.embedding.name
+}

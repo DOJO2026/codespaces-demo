@@ -17,8 +17,8 @@ variable "SKU_NAME" {
 }
 
 variable "DEPLOYMENT_NAME" {
-  type        = string
-  description = "Name you choose for the model deployment - this is the exact value that ends up as AZURE_OAI_DEPLOYMENT, not something Azure assigns"
+  type    = string
+  default = "chat-deployment"
 }
 
 variable "MODEL_NAME" {
@@ -32,6 +32,28 @@ variable "MODEL_VERSION" {
 }
 
 variable "MODEL_CAPACITY" {
+  type    = number
+  default = 1
+}
+
+# Deployment separado para embeddings - lo necesita Backend_Python_API para
+# generar los vectores que indexa en Azure AI Search (RAG).
+variable "EMBEDDING_DEPLOYMENT_NAME" {
+  type    = string
+  default = "embedding-deployment"
+}
+
+variable "EMBEDDING_MODEL_NAME" {
+  type    = string
+  default = "text-embedding-ada-002"
+}
+
+variable "EMBEDDING_MODEL_VERSION" {
+  type    = string
+  default = "2"
+}
+
+variable "EMBEDDING_MODEL_CAPACITY" {
   type    = number
   default = 1
 }
