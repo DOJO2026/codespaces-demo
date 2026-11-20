@@ -67,3 +67,31 @@ jobs:
 
     - name: Run Indexing Script
       run: python scripts/index_documents.py
+
+    - name: Upload Source PDFs to Blob Storage
+
+      # GET /api/v1/fuentes (en el backend) lista los documentos leyendo
+      # directamente los blobs de este contenedor junto con sus metadatos -
+      # es un endpoint separado del indice de busqueda de arriba, por eso
+      # hay que subir los PDF reales aqui tambien.
+      run: |
+        STORAGE_CONN=$(az storage account show-connection-string \
+          --name "${{ secrets.TF_VAR_STORAGE_ACCOUNT_NAME }}" \
+          --resource-group "${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}" \
+          --query connectionString -o tsv)
+
+        az storage blob upload \
+          --connection-string "$STORAGE_CONN" \
+          --container-name "contenedor" \
+          --name "cjavaperu_com.pdf" \
+          --file "data/search-docs/pdfs/cjavaperu_com.pdf" \
+          --metadata category="Microservicios" chunks=34 embeddingModel="embedding-deployment" description="Articulo: Implementacion de microservicios con Quarkus y MicroProfile (cjavaperu.com)" \
+          --overwrite
+
+        az storage blob upload \
+          --connection-string "$STORAGE_CONN" \
+          --container-name "contenedor" \
+          --name "www_altiacompany.pdf" \
+          --file "data/search-docs/pdfs/www_altiacompany.pdf" \
+          --metadata category="Microservicios" chunks=13 embeddingModel="embedding-deployment" description="Articulo de Altia sobre Quarkus (Inspiring Technology)" \
+          --overwrite
