@@ -54,22 +54,24 @@ jobs:
 
     steps:
 
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
     - name: Check Confirmation Input
 
       # Sin esto, cualquiera con acceso para disparar workflows manuales
       # podria borrar toda la infraestructura sin querer. Hay que escribir
       # literalmente "DESTROY" en el input "confirm" para que el job
       # continue - cualquier otro valor lo detiene aqui mismo, sin tocar
-      # nada en Azure.
+      # nada en Azure. Va despues del checkout porque el job entero corre
+      # con working-directory: infra por defecto, y esa carpeta no existe
+      # hasta que el repo esta clonado.
       run: |
         if [ "${{ github.event.inputs.confirm }}" != "DESTROY" ]; then
           echo "::error::Confirmacion incorrecta. Tenias que escribir exactamente 'DESTROY' en el input 'confirm'. No se borro nada."
           exit 1
         fi
         echo "Confirmacion recibida - procediendo a destruir la infraestructura."
-
-    - name: Checkout Repository
-      uses: actions/checkout@v4
 
     - name: Azure Login
       uses: azure/login@v2
