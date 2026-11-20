@@ -1,0 +1,129 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escribe DESTROY (en mayusculas) para confirmar que quieres borrar TODA la infraestructura'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  terraform-destroy:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra
+
+    env:
+
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_USE_OIDC: "true"
+
+      TG_EXPERIMENT: azure-backend
+
+      TF_STATE_RESOURCE_GROUP_NAME: ${{ secrets.TF_STATE_RESOURCE_GROUP_NAME }}
+      TF_STATE_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STATE_STORAGE_ACCOUNT_NAME }}
+
+      TF_VAR_LOCATION: ${{ secrets.TF_VAR_LOCATION }}
+      TF_VAR_RESOURCE_GROUP_NAME: ${{ secrets.TF_VAR_RESOURCE_GROUP_NAME }}
+
+      TF_VAR_APP_SERVICE_PLAN_NAME: ${{ secrets.TF_VAR_APP_SERVICE_PLAN_NAME }}
+
+      TF_VAR_BACKEND_APP_NAME: ${{ secrets.TF_VAR_BACKEND_APP_NAME }}
+      TF_VAR_FRONTEND_APP_NAME: ${{ secrets.TF_VAR_FRONTEND_APP_NAME }}
+
+      TF_VAR_OPENAI_ACCOUNT_NAME: ${{ secrets.TF_VAR_OPENAI_ACCOUNT_NAME }}
+      TF_VAR_SEARCH_SERVICE_NAME: ${{ secrets.TF_VAR_SEARCH_SERVICE_NAME }}
+      TF_VAR_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_VAR_STORAGE_ACCOUNT_NAME }}
+
+      TF_VAR_SQL_SERVER_NAME: ${{ secrets.TF_VAR_SQL_SERVER_NAME }}
+      TF_VAR_DATABASE_NAME: ${{ secrets.TF_VAR_DATABASE_NAME }}
+
+      TF_VAR_SQL_ADMIN_LOGIN: ${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}
+      TF_VAR_SQL_ADMIN_PASSWORD: ${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}
+
+    steps:
+
+    - name: Check Confirmation Input
+
+      # Sin esto, cualquiera con acceso para disparar workflows manuales
+      # podria borrar toda la infraestructura sin querer. Hay que escribir
+      # literalmente "DESTROY" en el input "confirm" para que el job
+      # continue - cualquier otro valor lo detiene aqui mismo, sin tocar
+      # nada en Azure.
+      run: |
+        if [ "${{ github.event.inputs.confirm }}" != "DESTROY" ]; then
+          echo "::error::Confirmacion incorrecta. Tenias que escribir exactamente 'DESTROY' en el input 'confirm'. No se borro nada."
+          exit 1
+        fi
+        echo "Confirmacion recibida - procediendo a destruir la infraestructura."
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.13.2
+
+    - name: Install Terragrunt
+
+      run: |
+        TG_VERSION=1.1.4
+        wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64
+        chmod +x terragrunt_linux_amd64
+        sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+        terragrunt --version
+
+    - name: Terragrunt Backend Bootstrap
+
+      # Si el storage account de state ya existe, esto no hace nada. Si no
+      # existe (por ejemplo, borraste el resource group a mano, como
+      # acabas de hacer), lo vuelve a crear para que Terragrunt tenga donde
+      # leer el state y sepa que destruir.
+      working-directory: infra/live/dev/resource_group
+      run: terragrunt backend bootstrap
+
+    - name: Terragrunt Init
+
+      run: |
+        for i in 1 2 3 4 5; do
+          terragrunt run --all init && exit 0
+          echo "Init failed (attempt $i/5) - reintentando en 30s..."
+          sleep 30
+        done
+        echo "::error::Terragrunt Init sigue fallando despues de 5 intentos."
+        exit 1
+
+    - name: Terragrunt Destroy
+
+      # Terragrunt calcula el orden correcto automaticamente - al reves del
+      # apply: primero backend/frontend (dependen de todo lo demas), luego
+      # sql/search/openai/storage, y al final resource_group.
+      run: terragrunt run --all destroy --non-interactive -- -auto-approve
+
+    - name: Verify Resource Group Deleted
+
+      run: |
+        if az group show --name "$TF_VAR_RESOURCE_GROUP_NAME" >/dev/null 2>&1; then
+          echo "::warning::El resource group '$TF_VAR_RESOURCE_GROUP_NAME' todavia existe - puede que queden recursos huerfanos que Terraform no gestiona. Revisalo en el Portal."
+        else
+          echo "Confirmado: el resource group '$TF_VAR_RESOURCE_GROUP_NAME' ya no existe."
+        fi
