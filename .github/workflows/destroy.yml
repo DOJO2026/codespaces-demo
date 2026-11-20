@@ -103,15 +103,50 @@ jobs:
       working-directory: infra/live/dev/resource_group
       run: terragrunt backend bootstrap
 
+    - name: Grant Storage Blob Data Role
+
+      # Si el Backend Bootstrap de arriba acaba de CREAR la cuenta de
+      # almacenamiento del state (por ejemplo, porque se borro el resource
+      # group entero), esa cuenta nueva no tiene el rol de acceso a datos
+      # asignado todavia - "Contributor" solo no alcanza con
+      # use_azuread_auth. Si ya existe la asignacion, este paso no hace
+      # nada (se tolera el error "already exists"); cualquier otro fallo
+      # SI detiene el job aqui, en vez de resurgir como un 403 confuso en
+      # el Init de abajo.
+      run: |
+        set +e
+        OUTPUT=$(az role assignment create --assignee "$ARM_CLIENT_ID" \
+          --role "Storage Blob Data Contributor" \
+          --scope "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$TF_STATE_RESOURCE_GROUP_NAME/providers/Microsoft.Storage/storageAccounts/$TF_STATE_STORAGE_ACCOUNT_NAME" 2>&1)
+        STATUS=$?
+        echo "$OUTPUT"
+        if [ $STATUS -ne 0 ] && ! echo "$OUTPUT" | grep -qi "already exists"; then
+          echo "::error::Role assignment failed for a reason other than 'already exists'. Most likely cause: the App Registration ($ARM_CLIENT_ID) does not have 'User Access Administrator' on the subscription yet - see infra/README.md for the one-time command to grant it."
+          exit 1
+        fi
+        set -e
+
+    - name: Wait for RBAC propagation
+
+      # Las asignaciones de rol en Azure son eventually-consistent - incluso
+      # una asignacion exitosa puede tardar unos minutos en surtir efecto.
+      # Sin esta pausa, el Terragrunt Init de abajo puede chocar con el
+      # mismo 403 AuthorizationPermissionMismatch justo despues de un
+      # role grant exitoso, solo por el delay de propagacion.
+      run: sleep 60
+
     - name: Terragrunt Init
 
+      # Reintenta para absorber cualquier delay de propagacion de RBAC que
+      # quede: cada intento fallido espera mas antes de volver a intentar,
+      # en vez de fallar el job entero de una vez.
       run: |
         for i in 1 2 3 4 5; do
           terragrunt run --all init && exit 0
           echo "Init failed (attempt $i/5) - reintentando en 30s..."
           sleep 30
         done
-        echo "::error::Terragrunt Init sigue fallando despues de 5 intentos."
+        echo "::error::Terragrunt Init sigue fallando despues de 5 intentos - esto ya no es un delay de propagacion, revisa la asignacion de rol en si."
         exit 1
 
     - name: Terragrunt Destroy
