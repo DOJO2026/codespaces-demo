@@ -189,7 +189,7 @@ jobs:
             -U "${{ secrets.TF_VAR_SQL_ADMIN_LOGIN }}" \
             -P "${{ secrets.TF_VAR_SQL_ADMIN_PASSWORD }}" \
             -C \
-            -Q "SELECT COUNT(*) AS TotalClientes FROM clientes"
+            -Q "SELECT (SELECT COUNT(*) FROM DBO.CONVERSATION) AS TotalConversations, (SELECT COUNT(*) FROM DBO.MESSAGE) AS TotalMessages"
 
       ############################################################
       # REMOVE TEMPORARY FIREWALL RULE

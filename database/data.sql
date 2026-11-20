@@ -1,10 +1,3 @@
-IF NOT EXISTS (SELECT 1 FROM clientes)
-BEGIN
-
-INSERT INTO clientes(nombre,correo)
-VALUES
-('Juan Perez','juan@demo.com'),
-('Maria Lopez','maria@demo.com'),
-('Carlos Ramos','carlos@demo.com');
-
-END;
+-- No hay datos de prueba que sembrar para CONVERSATION/MESSAGE: se llenan
+-- solas con el uso real del chat. Este archivo se deja vacio (en vez de
+-- borrarlo) porque database.yml siempre corre el step "Execute data.sql".
