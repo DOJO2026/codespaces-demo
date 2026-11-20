@@ -1,0 +1,284 @@
+[
+  {
+    "chunk_id": "cjavaperu-quarkus-000",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "Inicio Membresias Blog Cursos Productos Carrito\nImplementación de microservicios con Quarkus y MicroProfile\n/ Programacion / Por Katherine Sulbaran\nConclusiones clave\nQuarkus es un marco Java nativo de Kubernetes de pila completa creado para máquinas virtuales Java (JVM) y compilación nativa.\nAl desarrollar la arquitectura de microservicios, hay algunos desafíos nuevos que deben abordarse, como la escalabilidad, la seguridad y la observabilidad.\nLos microservicios proporcionan una lista de preocupaciones transversales para implementar correctamente los microservicios.\nKubernetes es un buen comienzo para implementar estas microservicilidades, pero hay algunas lagunas.\nMicroProfile es una especificación para implementar preocupaciones transversales utilizando el lenguaje de programación Java.\nLa autenticación entre los servicios internos se puede lograr mediante el uso de tokens (es decir, JWT).\n¿Por qué microservicilidades?"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-001",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "gramación Java.\nLa autenticación entre los servicios internos se puede lograr mediante el uso de tokens (es decir, JWT).\n¿Por qué microservicilidades?\nEn una arquitectura de microservicios, una aplicación está formada por varios servicios interconectados donde todos trabajan juntos para producir la funcionalidad\nempresarial requerida.\nEntonces, una arquitectura de microservicios empresarial típica se ve así:\nAl principio, puede parecer fácil implementar una aplicación con una arquitectura de microservicios.\nPero hacerlo correctamente no es un viaje fácil, ya que hay algunos desafíos nuevos que no estaban presentes con una arquitectura monolítica.\nAlgunos de estos son tolerancia a fallas, descubrimiento de servicios, escalado, registro y seguimiento, solo por mencionar algunos.\nPara resolver estos desafíos, cada microservicio debe implementar lo que en Red Hat hemos denominado «Microservicilidades»."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-002",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "olo por mencionar algunos.\nPara resolver estos desafíos, cada microservicio debe implementar lo que en Red Hat hemos denominado «Microservicilidades».\nEl término se refiere a una lista de inquietudes transversales que un servicio debe implementar además de la lógica empresarial para resolver estas inquietudes, como se\nresume en el siguiente diagrama:\nLa lógica empresarial se puede implementar en cualquier lenguaje (Java, Go, JavaScript) o en cualquier marco (Spring Boot, Quarkus) pero en torno a la lógica empresarial,\nse deben implementar las siguientes preocupaciones:\nAPI : se puede acceder al servicio a través de un conjunto definido de operaciones de API. Por ejemplo, en el caso de las API web RESTful, HTTP se utiliza como\nprotocolo. Además, la API se puede documentar utilizando herramientas como Swagger .\nDescubrimiento : los servicios necesitan descubrir otros servicios."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-003",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "otocolo. Además, la API se puede documentar utilizando herramientas como Swagger .\nDescubrimiento : los servicios necesitan descubrir otros servicios.\nInvocación : después de que se descubre un servicio, debe invocarse con un conjunto de parámetros y, opcionalmente, devolver una respuesta.\nElasticidad : una de las características importantes de una arquitectura de microservicios es que cada uno de los servicios es elástico, lo que significa que se puede escalar\nhacia arriba o hacia abajo de forma independiente dependiendo de algunos parámetros como la criticidad del sistema o según la carga de trabajo actual.\nResiliencia : en una arquitectura de microservicio, debemos desarrollar teniendo en cuenta las fallas, especialmente cuando nos comunicamos con otros servicios. En una\naplicación monolítica, la aplicación, en su conjunto, está activada o desactivada. Pero cuando esta aplicación se divide en una arquitectura de microservicio, la aplicación se"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-004",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "aplicación, en su conjunto, está activada o desactivada. Pero cuando esta aplicación se divide en una arquitectura de microservicio, la aplicación se\ncompone de varios servicios y todos están interconectados por la red, lo que implica que algunas partes de la aplicación pueden estar ejecutándose mientras que otras\npueden fallar. Es importante contener la falla para evitar propagar el error a través de los otros servicios. La resiliencia (o resiliencia de la aplicación) es la capacidad de una\naplicación / servicio para reaccionar a los problemas y aun así brindar el mejor resultado posible.\nCanalización : un servicio debe implementarse de forma independiente sin ningún tipo de orquestación de implementación. Por esta razón, cada servicio debe tener su\npropia canalización de implementación.\nAutenticación : uno de los aspectos clave con respecto a la seguridad en una arquitectura de microservicios es cómo autenticar / autorizar llamadas entre servicios"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-005",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": ": uno de los aspectos clave con respecto a la seguridad en una arquitectura de microservicios es cómo autenticar / autorizar llamadas entre servicios\ninternos. Los tokens web (y los tokens en general) son la forma preferida de representar reclamaciones de forma segura entre los servicios internos.\nRegistro : el registro es simple en aplicaciones monolíticas, ya que todos los componentes de la aplicación se ejecutan en el mismo nodo. Los componentes ahora se\ndistribuyen en varios nodos en forma de servicios, por lo tanto, para tener una vista completa de los rastros de registro, se requiere un recopilador de datos / sistema de\nregistro unificado.\nMonitoreo : medir el rendimiento de su sistema, comprender el estado general de la aplicación y alertar cuando algo anda mal son aspectos clave para mantener una\naplicación basada en microservicios funcionando correctamente. El seguimiento es un aspecto clave para controlar la aplicación."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-006",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "lave para mantener una\naplicación basada en microservicios funcionando correctamente. El seguimiento es un aspecto clave para controlar la aplicación.\nSeguimiento : el seguimiento se utiliza para visualizar el flujo de un programa y la progresión de los datos. Eso es especialmente útil cuando, como desarrollador / operador,\nnecesitamos verificar el recorrido del usuario a través de toda la aplicación.\nKubernetes se está convirtiendo en la herramienta de facto para implementar microservicios. Es un sistema de código abierto para automatizar, orquestar, escalar y\nadministrar contenedores.\nSolo tres de las diez microservicidades están cubiertas cuando se usa Kubernetes.\nEl descubrimiento se implementa con el concepto de un servicio de Kubernetes . Proporciona una forma de agrupar los pods de Kubernetes (actuando como uno solo) con"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-007",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ento se implementa con el concepto de un servicio de Kubernetes . Proporciona una forma de agrupar los pods de Kubernetes (actuando como uno solo) con\nuna IP virtual estable y un nombre DNS. Descubrir un servicio es solo una cuestión de realizar solicitudes utilizando el nombre del servicio de Kubernetes como nombre de\nhost.\nLa invocación de servicios es fácil con Kubernetes, ya que la propia plataforma proporciona la red necesaria para invocar cualquiera de los servicios.\nLa elasticidad (o escalamiento) es algo que Kubernetes tenía en mente desde el principio; por ejemplo\nkubectl scale deployment myservice --replicas=5 com\n, en ejecución , la implementación de myservice escala a cinco réplicas o instancias. La plataforma Kubernetes se encarga de encontrar los nodos adecuados, implementar el\nservicio y mantener la cantidad deseada de réplicas en funcionamiento todo el tiempo."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-008",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "etes se encarga de encontrar los nodos adecuados, implementar el\nservicio y mantener la cantidad deseada de réplicas en funcionamiento todo el tiempo.\nPero, ¿qué pasa con el resto de microservicilidades? Kubernetes solo cubre tres de ellos, entonces, ¿cómo podemos implementar el resto de ellos?\nHay muchas estrategias a seguir dependiendo del lenguaje o marco utilizado, pero en este artículo veremos cómo implementar algunas de ellas usando Quarkus .\n¿Qué es Quarkus?\nQuarkus es un marco Java nativo de Kubernetes de pila completa creado para máquinas virtuales Java (JVM) y compilación nativa, que optimiza Java específicamente para\ncontenedores y le permite convertirse en una plataforma eficaz para entornos sin servidor, en la nube y Kubernetes.\nEn lugar de reinventar la rueda, Quarkus utiliza marcos de trabajo conocidos de nivel empresarial respaldados por estándares / especificaciones y los hace compilables en un\nbinario mediante GraalVM .\n¿Qué es MicroProfile?"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-009",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "cidos de nivel empresarial respaldados por estándares / especificaciones y los hace compilables en un\nbinario mediante GraalVM .\n¿Qué es MicroProfile?\nQuarkus se integra con la especificación MicroProfile trasladando el ecosistema empresarial Java a la arquitectura de microservicios.\nEn el siguiente diagrama, vemos todas las API que componen la especificación MicroProfile. Algunas API, como CDI, JSON-P y JAX-RS, se basan en la especificación Jakarta\nEE (anteriormente Java EE). El resto fue desarrollado por la comunidad Java.\nImplementemos API, invocación, resiliencia, autenticación, registro, monitoreo y rastreo de microservicidades usando Quarkus.\nCómo implementar microservicidades con Quarkus\nEmpezando\nLa forma más rápida de comenzar a usar Quarkus es a través de la página de inicio agregando las dependencias requeridas. Para este ejemplo, las siguientes dependencias\nestán registradas para cumplir con los requisitos de microservicilidades:"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-010",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "las dependencias requeridas. Para este ejemplo, las siguientes dependencias\nestán registradas para cumplir con los requisitos de microservicilidades:\nAPI: RESTEasy JAX-RS, RESTEasy JSON-B, OpenAPI\nInvocación: REST Client JSON-B\nResiliencia: tolerancia a fallas\nAutenticación: JWT\nRegistro: GELF\nMonitoreo: métricas micrométricas\nRastreo: OpenTracing\nPodemos seleccionar manualmente cada una de las dependencias, o navegar hasta el siguiente enlace Microservicility Quarkus Generator donde se seleccionan todas. Luego\npresione el botón Generar su aplicación para descargar el archivo zip que contiene la aplicación andamiaje.\nEl servicio\nPara este ejemplo, se genera una aplicación muy simple con solo dos servicios. Un servicio, denominado servicio de calificación , devuelve las calificaciones de un libro\ndeterminado, y otro servicio, denominado servicio de libros , devuelve la información de un libro junto con sus calificaciones. Todas las llamadas entre servicios deben estar\nautenticadas."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-011",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "do servicio de libros , devuelve la información de un libro junto con sus calificaciones. Todas las llamadas entre servicios deben estar\nautenticadas.\nEn la siguiente figura, vemos una descripción general del sistema completo:\nEl servicio de clasificación ya está desarrollado y proporcionado como un contenedor de Linux. Inicie el servicio en el puerto 9090 ejecutando el siguiente comando:\ndocker run --rm -ti -p 9090:8080\nquay.io/lordofthejars/rating-service:1.0.0\nPara validar el servicio, realice una solicitud a http: // localhost: 9090 / rate / 1\ncurl localhost:8080/rate/1 -vv\n&gt; GET /rate/1 HTTP/1.1\n&gt; Host: localhost:8080\n&gt; User-Agent: curl/7.64.1\n&gt; Accept: */*\n&gt;\n&lt; HTTP/1.1 401 Unauthorized\n&lt; www-authenticate: Bearer {token}\n&lt; Content-Length: 0\nEl código de estado devuelto se\n401 Unauthorized\ndebe a que no se proporcionó información de autorización en la solicitud en forma de token de portador (JWT). Solo los tokens válidos con grupo\nEchoer"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-012",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "debe a que no se proporcionó información de autorización en la solicitud en forma de token de portador (JWT). Solo los tokens válidos con grupo\nEchoer\npueden acceder al servicio de clasificación .\nAPI\nQuarkus utiliza la conocida especificación JAX-RS para definir API web RESTful. Bajo las sábanas, Quarkus usa la implementación RESTEasy trabajando directamente con el\nmarco Vert.X sin usar la tecnología Servlet.\nDefinamos una API para el servicio de libros implementando las operaciones más comunes:\nimport javax.ws.rs.Consumes;\nimport javax.ws.rs.DELETE;\nimport javax.ws.rs.GET;\nimport javax.ws.rs.POST;\nimport javax.ws.rs.Path;\nimport javax.ws.rs.PathParam;\nimport javax.ws.rs.Produces;\nimport javax.ws.rs.QueryParam;\nimport javax.ws.rs.core.MediaType;\nimport javax.ws.rs.core.Response;\nimport javax.ws.rs.core.UriBuilder;\n@Path(\"/book\")\npublic class BookResource {\n@GET\nLo primero que hay que tener en cuenta es que se definen cuatro puntos finales diferentes:\nGET /book/{bookId}"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-013",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "/book\")\npublic class BookResource {\n@GET\nLo primero que hay que tener en cuenta es que se definen cuatro puntos finales diferentes:\nGET /book/{bookId}\nutiliza el método GET HTTP para devolver la información del libro con su calificación. El elemento de retorno se deshace automáticamente de JSON.\nPOST /book\nutiliza el método POST HTTP para insertar un libro que viene como contenido del cuerpo. El contenido del cuerpo se calcula automáticamente de JSON a un objeto\nJava.\nDELETE /book/{bookId}\nutiliza el método DELETE HTTP para eliminar un libro por su ID.\nGET /book/search?description={description}\nbusca libros por su descripción.\nLa segunda cosa a tener en cuenta es el tipo de retorno, a veces como un objeto Java y otras veces como una instancia de\njavax.ws.rs.core.Response\n. Cuando se utiliza un objeto Java, se calcula de un objeto Java al tipo de medio establecido en la\n@Produces\nanotación. En este servicio en particular, la salida es un documento JSON. Con el\nResponse"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-014",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "un objeto Java al tipo de medio establecido en la\n@Produces\nanotación. En este servicio en particular, la salida es un documento JSON. Con el\nResponse\nobjeto, tenemos un control detallado de lo que se envía de vuelta a la persona que llama; puede configurar el código de estado HTTP, los encabezados o, por ejemplo, el\ncontenido devuelto a la persona que llama. Depende del caso de uso preferir un enfoque sobre el otro.\nInvocación\nUna vez que hayamos definido la API para acceder al servicio de libros , es hora de desarrollar el fragmento de código para invocar el servicio de calificación para recuperar la\ncalificación de un libro.\nQuarkus utiliza la especificación MicroProfile Rest Client para acceder a servicios externos (HTTP). Proporciona un enfoque de tipo seguro para invocar servicios RESTful a\ntravés de HTTP utilizando algunas de las API de JAX-RS 2.0 para lograr coherencia y una reutilización más sencilla."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-015",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "o para invocar servicios RESTful a\ntravés de HTTP utilizando algunas de las API de JAX-RS 2.0 para lograr coherencia y una reutilización más sencilla.\nEl primer elemento a crear es una interfaz que representa el servicio remoto usando las anotaciones JAX-RS.\nimport javax.ws.rs.GET;\nimport javax.ws.rs.Path;\nimport javax.ws.rs.PathParam;\nimport javax.ws.rs.Produces;\nimport javax.ws.rs.core.MediaType;\nimport org.eclipse.microprofile.rest.client.inject.\n@Path(\"/rate\")\n@RegisterRestClient\npublic interface RatingService {\n@GET\n@Path(\"/{bookId}\")\n@Produces(MediaType.APPLICATION_JSON)\nRate getRate(@PathParam(\"bookId\") Long bookId);\n}\nCuando\ngetRate()\nse llama al método, se invoca una llamada HTTP remota al\n/rate/{bookId}\nreemplazar\nbookId\ncon el valor establecido en el parámetro del método. Es importante anotar la interfaz con la\n@RegisterRestClient\nanotación.\nLuego\nRatingService\n, es necesario inyectar la interfaz\nBookResource\npara ejecutar las llamadas remotas."
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-016",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "nterfaz con la\n@RegisterRestClient\nanotación.\nLuego\nRatingService\n, es necesario inyectar la interfaz\nBookResource\npara ejecutar las llamadas remotas.\nimport org.eclipse.microprofile.rest.client.inject.\n@RestClient\nRatingService ratingService;\n@GET\n@Path(\"/{bookId}\")\n@Produces(MediaType.APPLICATION_JSON)\npublic Book book(@PathParam(\"bookId\") Long bookId)\nfinal Rate rate = ratingService.getRate(bookId)\nBook book = findBook(bookId);\nreturn book;\n}\nLa\n@RestClient\nanotación inyecta una instancia de proxy de la interfaz, proporcionando la implementación del cliente.\nLo último es configurar la ubicación del servicio (la parte del nombre de host ). En Quarkus, las propiedades de configuración se establecen en un\nsrc/main/resources/application.properties\narchivo. Para configurar la ubicación del servicio, necesitamos usar el nombre completo de la interfaz de Rest Client con URL como clave y la ubicación como valor:\norg.acme.RatingService/mp-rest/url=http://localhost"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-017",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "sar el nombre completo de la interfaz de Rest Client con URL como clave y la ubicación como valor:\norg.acme.RatingService/mp-rest/url=http://localhost\nAntes de acceder correctamente al servicio de clasificación sin el\n401 Unauthorized\nproblema, es necesario abordar el problema de la autenticación mutua.\nAutenticación\nLos mecanismos de autenticación basados en token permiten que los sistemas autentiquen, autoricen y verifiquen identidades basándose en un token de seguridad. Quarkus\nse integra con la especificación de seguridad MicroProfile JWT RBAC para proteger los servicios que utilizan tokens de portador JWT.\nPara proteger un punto final usando MicroProfile JWT RBAC Security, solo necesitamos anotar el método con una\n@RolesAllowed\nanotación.\n@GET\n@Path(\"/{bookId}\")\n@RolesAllowed(\"Echoer\")\n@Produces(MediaType.APPLICATION_JSON)\npublic Book book(@PathParam(\"bookId\") Long bookId)"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-018",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ed\nanotación.\n@GET\n@Path(\"/{bookId}\")\n@RolesAllowed(\"Echoer\")\n@Produces(MediaType.APPLICATION_JSON)\npublic Book book(@PathParam(\"bookId\") Long bookId)\nLuego configuramos el emisor del token y la ubicación de la clave pública para verificar la firma del token en el\napplication.properties\narchivo:\nmp.jwt.verify.publickey.location=https://raw.github\nmp.jwt.verify.issuer=https://quarkus.io/using-jwt-r\nEsta extensión verifica automáticamente que: el token es válido; el emisor es correcto; el token no ha sido modificado; la firma es válida; no ha expirado.\nTanto el servicio de libros y servicio de clasificación están ahora protegidos por el mismo emisor JWT y las teclas, por lo que la comunicación entre los servicios requiere que\nel usuario sea autenticado proporcionando una portadora válida de ficha en la\nAuthentication\ncabecera.\nCon el servicio de clasificación en funcionamiento, comencemos el servicio de libros con el siguiente comando:\n./mvnw compile quarkus:dev"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-019",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "on\ncabecera.\nCon el servicio de clasificación en funcionamiento, comencemos el servicio de libros con el siguiente comando:\n./mvnw compile quarkus:dev\nFinalmente, podemos realizar una solicitud para obtener información del libro que proporcione un token web JSON válido como token de portador.\nLa generación del token está fuera del alcance de este artículo y ya se generó un token:\ncurl -H \"Authorization: Bearer eyJraWQiOiJcL3ByaXZh\nY la respuesta es nuevamente un error prohibido:\n&lt; HTTP/1.1 401 Unauthorized\n&lt; Content-Length: 0\nQuizás se pregunte por qué seguimos recibiendo este error después de proporcionar un token válido. Si inspeccionamos la consola del servicio de libros, vemos que se\nlanzó la siguiente excepción:\norg.jboss.resteasy.client.exception.ResteasyWebAppl\nat org.jboss.resteasy.client.exception.WebAppli\nat org.jboss.resteasy.microprofile.client.Defau"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-020",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "n:\norg.jboss.resteasy.client.exception.ResteasyWebAppl\nat org.jboss.resteasy.client.exception.WebAppli\nat org.jboss.resteasy.microprofile.client.Defau\nEl motivo de esta excepción es que estamos autenticados y autorizados para acceder al servicio de libros , pero el token de portador no se ha propagado al servicio de\nclasificación .\nPara propagar automáticamente los\nAuthorization\nencabezados de las solicitudes entrantes a las solicitudes del cliente de descanso, se requieren dos modificaciones.\nLa primera modificación es modificar la interfaz de Rest Client y anotarla con\norg.eclipse.microprofile.rest.client.inject.Registe\n.\n@Path(\"/rate\")\n@RegisterRestClient\n@RegisterClientHeaders\npublic interface RatingService {}\nLa segunda modificación consiste en configurar qué encabezados se propagan entre las solicitudes. Esto se establece en el\napplication.properties\narchivo:\norg.eclipse.microprofile.rest.client.propagateHeade"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-021",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "bezados se propagan entre las solicitudes. Esto se establece en el\napplication.properties\narchivo:\norg.eclipse.microprofile.rest.client.propagateHeade\nEjecute el mismo comando curl que antes y obtendremos el resultado correcto:\n&lt; HTTP/1.1 200 OK\n&lt; Content-Length: 39\n&lt; Content-Type: application/json\n&lt;\n* Connection #0 to host localhost left intact\n{\"bookId\":2,\"name\":\"Book 2\",\"rating\":1}* Closing co\nResiliencia\nTener servicios tolerantes a fallas es importante en una arquitectura de microservicios para evitar propagar una falla de un servicio a todos los llamadores directos e\nindirectos del mismo. Quarkus integra la especificación MicroProfile Fault Tolerance con las siguientes anotaciones para hacer frente a las fallas:\n●\n@Timeout\n: define un tiempo de duración máximo para la ejecución antes de que se lance una excepción.\n●\n@Retry\n: Vuelve a intentar la ejecución si la llamada falla.\n●\n@Bulkhead"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-022",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "o de duración máximo para la ejecución antes de que se lance una excepción.\n●\n@Retry\n: Vuelve a intentar la ejecución si la llamada falla.\n●\n@Bulkhead\n: Limita la ejecución simultánea para que las fallas en esa área no puedan sobrecargar todo el sistema.\n●\n@CircuitBreaker\n: Automáticamente a prueba de fallas cuando la ejecución falla repetidamente.\n●\n@Fallback\n: proporciona una solución alternativa / valor predeterminado cuando falla la ejecución.\nAgreguemos tres reintentos con un temporizador de apagado de un segundo entre reintentos en caso de que ocurra un error al acceder al servicio de calificación .\n@Retry(maxRetries = 3, delay = 1000)\nRate getRate(@PathParam(\"bookId\") Long bookId);\nAhora detenga el servicio de calificación y ejecute una solicitud. Se lanza la siguiente excepción:\norg.jboss.resteasy.spi.UnhandledException: javax.ws"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-023",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "hora detenga el servicio de calificación y ejecute una solicitud. Se lanza la siguiente excepción:\norg.jboss.resteasy.spi.UnhandledException: javax.ws\nObviamente, el error está ahí, pero tenga en cuenta que hubo un tiempo transcurrido de tres segundos antes de que se lance la excepción, ya que se ejecutan tres reintentos\ncon un retraso de un segundo.\nEn este caso, el servicio de calificación está inactivo, por lo que no hay recuperación posible, pero en un ejemplo del mundo real en el que el servicio de calificación puede\nestar inactivo por solo un pequeño período de tiempo, o se implementan varias réplicas del servicio, un simple reintento La operación puede ser suficiente para recuperarse\ny proporcionar una respuesta válida.\nPero, cuando los reintentos no son suficientes cuando se lanza una excepción, podemos propagar el error a las personas que llaman o proporcionar un valor alternativo para"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-024",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ntentos no son suficientes cuando se lanza una excepción, podemos propagar el error a las personas que llaman o proporcionar un valor alternativo para\nla llamada. Esta alternativa puede ser una llamada a otro sistema (es decir, un caché distribuido) o un valor estático.\nPara este caso de uso, cuando falla la conexión con el servicio de calificación , se devuelve un valor de calificación de 0.\nPara implementar una lógica de respaldo, lo primero que debe hacer es implementar la\norg.eclipse.microprofile.faulttolerance.FallbackHan\ninterfaz configurando el tipo de retorno como el mismo tipo que el método de estrategia de respaldo proporciona como valor alternativo. Para este caso,\nRate\nse devuelve un objeto predeterminado .\nimport org.eclipse.microprofile.faulttolerance.Exec\nimport org.eclipse.microprofile.faulttolerance.Fall\npublic class RatingServiceFallback implements Fallb\n@Override\npublic Rate handle(ExecutionContext context) {\nRate rate = new Rate();\nrate.rate = 0;\nreturn rate;\n}\n}"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-025",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "atingServiceFallback implements Fallb\n@Override\npublic Rate handle(ExecutionContext context) {\nRate rate = new Rate();\nrate.rate = 0;\nreturn rate;\n}\n}\nLo último que debe hacer es anotar el\ngetRating()\nmétodo con una\n@org.eclipse.microprofile.faulttolerance.Fallback\nanotación para configurar la clase de respaldo que se ejecutará cuando no sea posible la recuperación.\n@Retry(maxRetries = 3, delay = 1000)\n@Fallback(RatingServiceFallback.class)\nRate getRate(@PathParam(\"bookId\") Long bookId);\nSi repite la misma solicitud que antes, no se lanza ninguna excepción, pero una salida válida con el campo de calificación se establece en 0.\n* Connection #0 to host localhost left intact\n{\"bookId\":2,\"name\":\"Book 2\",\"rating\":0}* Closing co\nEl mismo enfoque se puede utilizar con cualquiera de las otras estrategias proporcionadas por la especificación. Por ejemplo, en el caso de un patrón de interrupción del\ncircuito:\n@CircuitBreaker(requestVolumeThreshold = 4,\nfailureRatio=0.75,\ndelay = 1000)"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-026",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ación. Por ejemplo, en el caso de un patrón de interrupción del\ncircuito:\n@CircuitBreaker(requestVolumeThreshold = 4,\nfailureRatio=0.75,\ndelay = 1000)\nSi se producen tres (4 x 0,75) fallos entre la ventana móvil de cuatro invocaciones consecutivas, el circuito se abre durante 1000 ms y luego se vuelve a semiabierto. Si la\ninvocación mientras el circuito está medio abierto se realiza correctamente, se vuelve a cerrar. De lo contrario, permanece abierto.\nInicio sesión\nEn la arquitectura de microservicios, se recomienda recopilar registros de todos los servicios en un registro unificado para un uso y una comprensión más eficientes.\nUna solución es utilizar Fluentd , un recopilador de datos de código abierto para una capa de registro unificada en Kubernetes. Quarkus se integra con Fluentd utilizando el\nformato de registro extendido Graylog (GELF).\nLa integración es realmente sencilla. Primero, use la lógica de registro como con cualquier otra aplicación de Quarkus:"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-027",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "stro extendido Graylog (GELF).\nLa integración es realmente sencilla. Primero, use la lógica de registro como con cualquier otra aplicación de Quarkus:\nimport org.jboss.logging.Logger;\nprivate static final Logger LOG = Logger.getLogger(\n@GET\n@Path(\"/{bookId}\")\n@RolesAllowed(\"Echoer\")\n@Produces(MediaType.APPLICATION_JSON)\npublic Book book(@PathParam(\"bookId\") Long bookId)\nLOG.info(\"Get Book\");\nA continuación, habilite el formato GELF y configure la ubicación del servidor Fluentd:\nquarkus.log.handler.gelf.enabled=true\nquarkus.log.handler.gelf.host=localhost\nquarkus.log.handler.gelf.port=12201\nFinalmente, podemos hacer una solicitud al punto final registrado:\ncurl -H \"Authorization: Bearer ...\" localhost:8080/\n{\"bookId\":1,\"name\":\"Book 1\",\"rating\":3}\nNada ha cambiado en términos de producción, pero el logline se ha transmitido a Fluentd. Si se usa Kibana para visualizar datos, veremos la línea de registro almacenada:\nVigilancia"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-028",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "e producción, pero el logline se ha transmitido a Fluentd. Si se usa Kibana para visualizar datos, veremos la línea de registro almacenada:\nVigilancia\nEl monitoreo es otro «microservicio» que debe implementarse en nuestra arquitectura de microservicio. Quarkus se integra con Micrometer para el monitoreo de\naplicaciones. Micrometer proporciona un único punto de entrada a los sistemas de monitoreo más populares, lo que le permite instrumentar su código de aplicación basado\nen JVM sin la dependencia del proveedor.\nPara este ejemplo, el formato Prometheus se usa como salida de monitoreo, pero Micrometer (y Quarkus) también admite otros formatos como Azure Monitor, Stackdriver,\nSignalFx, StatsD y DataDog.\nPuede registrar la siguiente dependencia de Maven para proporcionar salida de Prometheus:\n&lt;dependency&gt;\n&lt;groupId&gt;io.quarkus&lt;/groupId&gt;\n&lt;artifactId&gt;quarkus-micrometer-registry-pro\n&lt;/dependency&gt;"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-029",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "lida de Prometheus:\n&lt;dependency&gt;\n&lt;groupId&gt;io.quarkus&lt;/groupId&gt;\n&lt;artifactId&gt;quarkus-micrometer-registry-pro\n&lt;/dependency&gt;\nLa extensión Micrometer registra algunas métricas relacionadas con el sistema, JVM o HTTP de forma predeterminada. Un subconjunto de las métricas recopiladas está\ndisponible en el\n/q/metrics\npunto final, como se muestra a continuación:\ncurl localhost:8080/q/metrics\njvm_threads_states_threads{state=\"runnable\",} 22.0\njvm_threads_states_threads{state=\"blocked\",} 0.0\njvm_threads_states_threads{state=\"waiting\",} 10.0\nhttp_server_bytes_read_count 1.0\nhttp_server_bytes_read_sum 0.0\nPero las métricas específicas de la aplicación también se pueden implementar utilizando la API Micrometer.\nImplementemos una métrica personalizada que mida el libro mejor calificado.\nEl registro de una métrica, en este caso, un indicador, se logra mediante la\nio.micrometer.core.instrument.MeterRegistry\nclase.\nprivate final MeterRegistry registry;"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-030",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "una métrica, en este caso, un indicador, se logra mediante la\nio.micrometer.core.instrument.MeterRegistry\nclase.\nprivate final MeterRegistry registry;\nprivate final LongAccumulator highestRating = new L\npublic BookResource(MeterRegistry registry) {\nthis.registry = registry;\nregistry.gauge(\"book.rating.max\", this,\nBookResource::highestRatingBook);\n}\nHagamos algunas solicitudes y validemos que el indicador esté correctamente actualizado.\ncurl -H \"Authorization: Bearer ...\" localhost:8080/\n{\"bookId\":1,\"name\":\"Book 1\",\"rating\":3}\ncurl localhost:8080/q/metrics\n# HELP book_rating_max\n# TYPE book_rating_max gauge\nbook_rating_max 3.0\nTambién podemos configurar un temporizador para registrar el tiempo dedicado a obtener información de calificación del servicio de calificación.\nSupplier&lt;Rate&gt; rateSupplier = () -&gt; {\nreturn ratingService.getRate(bookId);\n};\nfinal Rate rate = registry.timer(\"book.rating.test\""
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-031",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ificación.\nSupplier&lt;Rate&gt; rateSupplier = () -&gt; {\nreturn ratingService.getRate(bookId);\n};\nfinal Rate rate = registry.timer(\"book.rating.test\"\nHagamos algunas solicitudes y validemos el tiempo dedicado a recopilar calificaciones.\n# HELP book_rating_test_seconds\n# TYPE book_rating_test_seconds summary\nbook_rating_test_seconds_count 4.0\nbook_rating_test_seconds_sum 1.05489108\n# HELP book_rating_test_seconds_max\n# TYPE book_rating_test_seconds_max gauge\nbook_rating_test_seconds_max 1.018622001\nMicrometer usa\nMeterFilter\ninstancias para personalizar las métricas emitidas por\nMeterRegistry\ninstancias. La extensión Micrometer detectará\nMeterFilter\nbeans CDI y los usará al inicializar\nMeterRegistry\ninstancias.\nPor ejemplo, podemos definir una etiqueta común para configurar el entorno (prod, testing, staging, etc.) donde se ejecuta la aplicación.\n@Singleton\npublic class MicrometerCustomConfiguration {\n@Produces\n@Singleton\npublic MeterFilter configureAllRegistries() {"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-032",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "e se ejecuta la aplicación.\n@Singleton\npublic class MicrometerCustomConfiguration {\n@Produces\n@Singleton\npublic MeterFilter configureAllRegistries() {\nreturn MeterFilter.commonTags(Arrays.asList(\nTag.of(\"env\", \"prod\")));\n}\n}\nEnvíe una nueva solicitud y valide que las métricas ahora estén etiquetadas.\nhttp_client_requests_seconds_max{clientName=\"localh\nTenga en cuenta la etiqueta que\nenv\ncontiene el valor\nprod\n.\nRastreo\nLas aplicaciones de Quarkus utilizan la especificación OpenTracing para proporcionar un seguimiento distribuido para aplicaciones web interactivas.\nConfiguremos OpenTracing para conectarse a un servidor Jaeger, estableciendo book-service como el nombre del servicio para identificar los rastros:\nquarkus.jaeger.enabled=true\nquarkus.jaeger.endpoint=http://localhost:14268/api/\nquarkus.jaeger.service-name=book-service\nquarkus.jaeger.sampler-type=const\nquarkus.jaeger.sampler-param=1\nAhora, hagamos una solicitud:\ncurl -H \"Authorization: Bearer ...\" localhost:8080/"
+  },
+  {
+    "chunk_id": "cjavaperu-quarkus-033",
+    "parent_id": "cjavaperu-quarkus",
+    "title": "cjavaperu.com - Implementacion de microservicios con Quarkus y MicroProfile",
+    "chunk": "ice\nquarkus.jaeger.sampler-type=const\nquarkus.jaeger.sampler-param=1\nAhora, hagamos una solicitud:\ncurl -H \"Authorization: Bearer ...\" localhost:8080/\n{\"bookId\":1,\"name\":\"Book 1\",\"rating\":3}\nAcceso a la interfaz de usuario de Jaeger para validar que se rastrea la llamada:\nFUENTE: https://www.infoq.com/articles/microservicilities-quarkus/?\ntopicPageSponsorship=3109b35a-4fbc-4bfd-94a5-\n327d255d24e7&itm_source=articles_about_java&itm_medium=link&itm_campaign=\njava\n← Entrada anterior Entrada siguiente →\nCopyright © 2026 CJava Perú |"
+  },
+  {
+    "chunk_id": "altia-quarkus-000",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "Insights Servicios Industrias ALTIA Únete Español\nQuarkus\nEn esta nueva edición de Inspiring Technology, nuestros Hunters,\nARTÍCULOS RELACIONADOS\ncazadores de tendencias tecnológicas, nos hablan de Quarkus, un\nAttention Is All You Need: el\nmarco desarrollado con el objetivo de ejecutar programas de Java\nartículo que cambió el mundo\nen contenedores. ¡Continúa leyendo!\nLos Premios Vivofácil\nreconocen nuestra labor en\n02/05/2024 conciliación y\ncorresponsabilidad\nEl verdadero problema de la\nIA empresarial no es el\nmodelo, es la industrialización\nRenovamos nuestro\ncompromiso con el Pacto\nDigital de Galicia para\nimpulsar una comunidad más\ncompetitiva, inclusiva y\ntecnológicamente soberana\nEl Premio Nortempo-Aedipe a\nla Innovación en RR.HH.\nreconoce nuestro modelo de\ngestión del talento\nTAGS\nInspiring Technology\nQuarkus es un framework de Java creado por Red Hat con un enfoque en entornos basados\nen la nube, específicamente Kubernetes y serverless. Además, el framework realiza un\nSHARE"
+  },
+  {
+    "chunk_id": "altia-quarkus-001",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "Java creado por Red Hat con un enfoque en entornos basados\nen la nube, específicamente Kubernetes y serverless. Además, el framework realiza un\nSHARE\nesfuerzo en ofrecer la mejor experiencia de desarrollo posible, mediante la adopción de\nestándares, integraciones y configuraciones sencillas.\nKubernetes-native\nQuarkus incorpora elementos fundamentales para el desarrollo y despliegue en Kubernetes\ncomo son las métricas, trazas, reportes de estado de salud, depuración en máquinas\nalojadas en un clúster remoto y configuraciones basadas directamente en ConfigMaps de\nKubernetes.\nAdicionalmente, con la instalación de una extensión, Quarkus es capaz de generar todos los\nartefactos y configuraciones necesarias para el desplegar y actualizar versiones de un servicio,\nen un clúster de Kubernetes.\nConsumo de recursos y tiempo de inicialización\nreducidos\nEl tiempo de inicialización y el consumo de recursos son dos aspectos con una gran"
+  },
+  {
+    "chunk_id": "altia-quarkus-002",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "ubernetes.\nConsumo de recursos y tiempo de inicialización\nreducidos\nEl tiempo de inicialización y el consumo de recursos son dos aspectos con una gran\nrelevancia en entornos basados en la nube. La reducción de estos permite un escalado rápido,\nuna reducción de costes en sistemas con facturación por recursos consumidos, tiempos de\nrespuesta rápidos en funciones como servicio y eficiencia en sistemas con una gran cantidad\nde servicios en ejecución simultánea.\nPara conseguir esto, Quarkus realiza el máximo de procesos posibles en tiempo de\ncompilación, como son análisis de configuraciones, resolución del classpath, carga de clases,\netc. Este preprocesado consigue un ejecutable más optimizado, con un tiempo de inicio y\nuso de recursos reducidos frente a otros frameworks que realizan estas acciones en tiempo de\nejecución, como podría ser Spring.\nCompilaciones nativas con GraalVM\nLas compilaciones nativas pueden reducir aún más el tiempo de inicialización y consumo de"
+  },
+  {
+    "chunk_id": "altia-quarkus-003",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "n, como podría ser Spring.\nCompilaciones nativas con GraalVM\nLas compilaciones nativas pueden reducir aún más el tiempo de inicialización y consumo de\nrecursos, mediante la creación de un artefacto ejecutable por el sistema operativo, sin el\nrequerimiento de una máquina virtual Java.\nQuarkus ofrece la capacidad de realizar compilaciones nativas de forma sencilla, sin la\nnecesidad instalar librerías ni realizar configuraciones adicionales. Para realizar una compilación\nnativa, únicamente es necesario ejecutar el goal “quarkus:build” con el perfil “native”\nhabilitado.\nAdemás, es posible realizar la propia compilación en un contenedor Docker, con la opción “-\nDquarkus.native.container-build=true”, permitiendo realizar una compilación sin necesidad\nde configurar el entorno.\nEjemplo de comando utilizado para realizar una compilación nativa\nExtensiones\nQuarkus cuenta con amplio ecosistema de extensiones, con una configuración estandarizada,"
+  },
+  {
+    "chunk_id": "altia-quarkus-004",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "o utilizado para realizar una compilación nativa\nExtensiones\nQuarkus cuenta con amplio ecosistema de extensiones, con una configuración estandarizada,\nque permiten integrar diversos servicios y librerías, como podrían ser clientes para proveedores\nde identidad como Keycloak, desarrollo de funciones como servicio en la nube de AWS con\nlambda, gestión de configuraciones en Azure, etc.\nEstas extensiones facilitan la integración, configuración y mantenimiento de servicios y librerías\nsoportados.\nBasado en\nestándares\nLa adopción de estándares ya existentes en\nla industria es uno de los aspectos clave que\nofrece Quarkus, aprovechando herramientas\ny conocimientos ya existentes.\nLa utilización de estándares permite Comparativa en consumo de recursos\nminimizar la curva de aprendizaje y durante la inicialización.\ntiempo de adopción para desarrolladores que\ncon experiencia previa en estos estándares.\nQuarkus adopta los siguientes estándares:"
+  },
+  {
+    "chunk_id": "altia-quarkus-005",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "e la inicialización.\ntiempo de adopción para desarrolladores que\ncon experiencia previa en estos estándares.\nQuarkus adopta los siguientes estándares:\nJava EE (Jakarta):Definición de servicios REST, persistencia, trabajos en lotes,\ninyección de dependencias, validaciones, mapeado JSON y trabajos en lotes.\nMicroprofile: Configuraciones del entorno, autenticación, documentación de endpoints,\ntelemetría, tolerancia a fallos y comunicaciones entre servicios.\nOpenTelemetry: Trazabilidad y recolección de métricas.\nDev services\nQuarkus configura y provisiona automáticamente servicios locales para desarrollo, en forma de\ncontendores, totalmente preconfigurados y de forma automática.\nEntre otros, Dev Services ofrece configuraciones de desarrollo automatizadas para los\nsiguientes servicios: AMQP, Apicurio Registry, múltiples bases de datos relacionales,\nElasticsearch, Kafka, Keycloak, RabbitMQ, Redis, Vault y clientes de Kubernetes."
+  },
+  {
+    "chunk_id": "altia-quarkus-006",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "cios: AMQP, Apicurio Registry, múltiples bases de datos relacionales,\nElasticsearch, Kafka, Keycloak, RabbitMQ, Redis, Vault y clientes de Kubernetes.\nPor ejemplo, al iniciar un proyecto en el modo de desarrollo y la extensión de PostgreSQL\ninstalada, Quarkus automáticamente creará un contendor Docker con un servidor PostgreSQL y\ncreará la configuración en el proyecto para utilizar este contendor.\nCompatibilidad con Spring\nMientras que Quarkus recomienda utilizar sus propias APIs, ofrece una capa de compatibilidad\nque permite la utilización de las anotaciones definidas por Spring, realizando un mapeado a las\nlibrerías implementadas y optimizadas por Quarkus.\nExisten capas de compatibilidad para las siguientes APIs de Spring: Spring Web, Data, Data\nRest, Security, Cache y Dependency Injection.\nEsta capa de compatibilidad, por una parte, podría ayudar con la migración de proyectos\npreviamente implementados con Spring Boot. Además, por otra parte, podría ser utilizada"
+  },
+  {
+    "chunk_id": "altia-quarkus-007",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "ad, por una parte, podría ayudar con la migración de proyectos\npreviamente implementados con Spring Boot. Además, por otra parte, podría ser utilizada\ntemporalmente para facilitar la adopción del framework por un equipo con experiencia previa\nen Spring.\nComparación con Spring Boot\nCon el fin de realizar una comparativa, se ha implementado una API equivalente en Spring\nBoot y en Quarkus. Utilizando estas implementaciones, se han realizado pruebas de carga\nque consisten en la ejecución de 80 hilos, los cuales ejecutan un bucle con 80 repeticiones\nde 4 peticiones.\nAdemás, se han compilado ambos proyectos tanto de forma estándar como de forma nativa.\nInicialización\nSe han recogido las siguientes métricas en a los contenedores Docker durante la inicialización\nde los servicios.\nComparativa en consumo de recursos durante la inicialización.\nSe puede apreciar que, en la versión estándar, Quarkus consume una cantidad notablemente\ninferior tanto de CPU como de memoria."
+  },
+  {
+    "chunk_id": "altia-quarkus-008",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "nte la inicialización.\nSe puede apreciar que, en la versión estándar, Quarkus consume una cantidad notablemente\ninferior tanto de CPU como de memoria.\nMientras que, en las versiones con compilación nativa, Quarkus consume una cantidad\nconsiderable menor de memoria, 25 Mb contra 130 Mb. En cuanto al consumo de CPU, por\nunos instantes Spring consume una cantidad superior de CPU, aunque esta rápidamente se\niguala en los dos servicios a cero.\nComparativa en consumo de recursos durante la inicialización, compilación nativa.\nPrueba de carga\nUna vez se han ejecutado las pruebas de carga se han obtenido los siguientes resultados.\nComparativa en consumo de recursos durante la prueba de carga.\nEn este caso se puede apreciar que, en las versiones estándar, el uso de CPU se mantiene en\nunos valores similares, mientras que el uso de memoria es considerablemente menor en el\ncaso de Quarkus.\nEn cuanto a las versiones compiladas de forma nativa, se mantiene un consumo de CPU"
+  },
+  {
+    "chunk_id": "altia-quarkus-009",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "l uso de memoria es considerablemente menor en el\ncaso de Quarkus.\nEn cuanto a las versiones compiladas de forma nativa, se mantiene un consumo de CPU\nsimilar, superando la versión de Spring en algunos picos a la versión de Quarkus, manteniendo\nun consumo de memoria superior.\nComparativa en consumo de recursos durante la prueba de carga, compilación nativa.\nMétricas adicionales\nAdicionalmente, se han recogido los tiempos de inicialización, compilación y creación de la\nimagen Docker.\nTeniendo en cuenta estos datos, la versión que mejor rendimiento es Quarkus con compilación\nnativa. Aunque, al realizar una compilación nativa podrían llegar a producirse problemas con\nlibrerías externas, por lo que es muy importante realizar pruebas para verificar su correcto\nfuncionamiento.\nConclusiones\nQuarkus es una opción a tener en cuenta a la hora de implementar microservicios o funciones,\nespecialmente aquellos que residan contenedores ubicados clústeres Kubernetes y entornos en\nla nube."
+  },
+  {
+    "chunk_id": "altia-quarkus-010",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "a hora de implementar microservicios o funciones,\nespecialmente aquellos que residan contenedores ubicados clústeres Kubernetes y entornos en\nla nube.\nQuarkus ofrece una selección de herramientas escogidas con la intención de mejorar la\nexperiencia y tiempo de desarrollo, contando con configuraciones, estructuras e\nintegraciones ya establecidas y preconfiguradas.\nAdemás, al basarse en estándares, en el caso de que el equipo tenga experiencia en el\ndesarrollo de aplicaciones basadas en Java EE, la curva de aprendizaje se puede ver\nreducida notablemente.\nHay que tener en cuenta que, pese a que Quarkus ofrece una extensa documentación, otros\nframeworks como Spring cuentan con una mayor comunidad y número de desarrolladores.\n¿Conoces el programa Hunters?\nSer un hunter es aceptar el reto de probar nuevas soluciones que aporten resultados\ndiferenciales. Un grupo transversal con capacidad de generar y transferir conocimiento con la"
+  },
+  {
+    "chunk_id": "altia-quarkus-011",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "reto de probar nuevas soluciones que aporten resultados\ndiferenciales. Un grupo transversal con capacidad de generar y transferir conocimiento con la\nhabilidad de ver anticipadamente las soluciones digitales que nos harán crecer.\nUtCiloiznasmulotas cmooáksi eins fporrompaiacsió yn d seo tberrece lrooss Hpaurnat edrest.ectar si ha dado su consentimiento al uso de cookies y para identificarlo y distinguirlo de otros usuarios\nPuede obtener más información y configurar sus preferencias aquí\nEsenciales\nCookies necesarias para el funcionamiento del sitio web\nAnalíticas\nCookies que envían información anónima a sistemas analíticos. Esta información nos sirve para mejorar nuestro sitio web.\nRECHAZAR COOKIES ACEPTAR COOKIES\nSubscribe to our newsletter\nSobre ALTIA Sostenibilidad & ESG\nContacto Inversores & Accionistas Email\nCompromiso ético\nEmpleo Eventos Negocio Tecnología\nNo soy un robot\nreCAPTCHA\nSuscribirse"
+  },
+  {
+    "chunk_id": "altia-quarkus-012",
+    "parent_id": "altia-quarkus",
+    "title": "Altia - Quarkus (Inspiring Technology)",
+    "chunk": "Sostenibilidad & ESG\nContacto Inversores & Accionistas Email\nCompromiso ético\nEmpleo Eventos Negocio Tecnología\nNo soy un robot\nreCAPTCHA\nSuscribirse\nEmpresa cotizada en BME Growth · Aviso Legal · Política de Cookies · © 2026 ALTIA · Todos los derechos reservados\nUtilizamos cookies propias y de terceros para detectar si ha dado su consentimiento al uso de cookies y para identificarlo y distinguirlo de otros usuarios\nPuede obtener más información y configurar sus preferencias aquí\nEsenciales\nCookies necesarias para el funcionamiento del sitio web\nAnalíticas\nCookies que envían información anónima a sistemas analíticos. Esta información nos sirve para mejorar nuestro sitio web.\nRECHAZAR COOKIES ACEPTAR COOKIES"
+  }
+]
