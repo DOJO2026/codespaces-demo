@@ -12,10 +12,12 @@ backend):
 """
 import json
 import os
+import re
 import sys
+import time
 
 import requests
-from openai import AzureOpenAI
+from openai import AzureOpenAI, RateLimitError
 
 AZURE_OAI_ENDPOINT = os.environ["AZURE_OAI_ENDPOINT"]
 AZURE_OAI_KEY = os.environ["AZURE_OAI_KEY"]
@@ -74,9 +76,20 @@ def ensure_index():
     print(f"Indice '{AZURE_SEARCH_INDEX}' listo (status {resp.status_code}).")
 
 
-def get_embedding(text: str):
-    response = client.embeddings.create(model=AZURE_OAI_EMBEDDING_DEPLOYMENT, input=text)
-    return response.data[0].embedding
+def get_embedding(text: str, max_retries: int = 8):
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.embeddings.create(model=AZURE_OAI_EMBEDDING_DEPLOYMENT, input=text)
+            time.sleep(1)  # pequeña pausa para no pegarle tan seguido al limite
+            return response.data[0].embedding
+        except RateLimitError as e:
+            wait = 65
+            match = re.search(r"retry after (\d+) seconds", str(e), re.IGNORECASE)
+            if match:
+                wait = int(match.group(1)) + 5
+            print(f"  Rate limit alcanzado (intento {attempt}/{max_retries}), esperando {wait}s...")
+            time.sleep(wait)
+    raise RuntimeError("Se agotaron los reintentos por rate limit (429) de Azure OpenAI.")
 
 
 def upload_documents(docs):
